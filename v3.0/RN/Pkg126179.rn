@@ -1,0 +1,90 @@
+gem install nokogiri -- --use-system-libraries
+        [--with-xml2-config=/path/to/xml2-config]
+        [--with-xslt-config=/path/to/xslt-config]
+
+If you are using Bundler, tell it to use the option:
+
+    bundle config build.nokogiri --use-system-libraries
+    bundle install
+
+Note, however, that nokogiri is not fully compatible with arbitrary
+versions of libxml2 provided by OS/package vendors.
+************************************************************************
+Extracting libxml2-2.9.4.tar.gz into tmp/x86_64-pc-linux-gnu/ports/libxml2/2.9.4... OK
+Running 'configure' for libxml2 2.9.4... OK
+Running 'compile' for libxml2 2.9.4... OK
+Running 'install' for libxml2 2.9.4... OK
+Activating libxml2 2.9.4 (from /home/markb/stack/lib64/ruby/gems/2.3.0/gems/nokogiri-1.6.8.1/ports/x86_64-pc-linux-gnu/libxml2/2.9.4)...
+************************************************************************
+IMPORTANT NOTICE:
+
+Building Nokogiri with a packaged version of libxslt-1.1.29.
+
+Team Nokogiri will keep on doing their best to provide security
+updates in a timely manner, but if this is a concern for you and want
+to use the system library instead; abort this installation process and
+reinstall nokogiri as follows:
+
+    gem install nokogiri -- --use-system-libraries
+        [--with-xml2-config=/path/to/xml2-config]
+        [--with-xslt-config=/path/to/xslt-config]
+
+If you are using Bundler, tell it to use the option:
+
+    bundle config build.nokogiri --use-system-libraries
+    bundle install
+************************************************************************
+Extracting libxslt-1.1.29.tar.gz into tmp/x86_64-pc-linux-gnu/ports/libxslt/1.1.29... OK
+Running 'configure' for libxslt 1.1.29... OK
+Running 'compile' for libxslt 1.1.29... OK
+Running 'install' for libxslt 1.1.29... OK
+Activating libxslt 1.1.29 (from /home/markb/stack/lib64/ruby/gems/2.3.0/gems/nokogiri-1.6.8.1/ports/x86_64-pc-linux-gnu/libxslt/1.1.29)...
+checking for main() in -llzma... no
+checking for xmlParseDoc() in libxml/parser.h... no
+checking for xmlParseDoc() in -lxml2... no
+checking for xmlParseDoc() in -llibxml2... no
+-----
+libxml2 is missing.  Please locate mkmf.log to investigate how it is failing.
+-----
+*** extconf.rb failed ***
+Could not create Makefile due to some reason, probably lack of necessary
+libraries and/or headers.  Check the mkmf.log file for more details.  You may
+need configuration options.
+
+Provided configuration options:
+        --with-opt-dir
+        --with-opt-include
+        --without-opt-include=${opt-dir}/include
+        --with-opt-lib
+        --without-opt-lib=${opt-dir}/lib64
+        --with-make-prog
+        --without-make-prog
+        --srcdir=.
+        --curdir
+        --ruby=/home/markb/stack/bin/$(RUBY_BASE_NAME)
+        --help
+        --clean
+        --use-system-libraries
+        --enable-static
+        --disable-static
+        --with-zlib-dir
+        --without-zlib-dir
+        --with-zlib-include
+        --without-zlib-include=${zlib-dir}/include
+        --with-zlib-lib
+        --without-zlib-lib=${zlib-dir}/lib64
+        --enable-cross-build
+        --disable-cross-build
+        --with-xml2lib
+        --without-xml2lib
+        --with-libxml2lib
+        --without-libxml2lib
+
+To see why this extension failed to compile, please check the mkmf.log which can be found here:
+
+  /home/markb/stack/lib64/ruby/gems/2.3.0/extensions/x86_64-linux/2.3.0-static/nokogiri-1.6.8.1/mkmf.log
+
+extconf failed, exit code 1
+
+Gem files will remain installed in /home/markb/stack/lib64/ruby/gems/2.3.0/gems/nokogiri-1.6.8.1 for inspection.
+Results logged to /home/markb/stack/lib64/ruby/gems/2.3.0/extensions/x86_64-linux/2.3.0-static/nokogiri-1.6.8.1/gem_make.out
