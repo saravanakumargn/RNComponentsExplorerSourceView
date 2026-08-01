@@ -1,0 +1,246 @@
+import type { RefObject } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
+import type { Platform, StyleProp, ViewStyle } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+
+export interface Example {
+  name: string;
+  component: React.ComponentType;
+  unsupportedPlatforms?: Set<typeof Platform.OS>;
+}
+
+export interface ExamplesSection {
+  sectionTitle: string;
+  data: Example[];
+}
+
+export const COLORS = {
+  offWhite: '#f8f9ff',
+  headerSeparator: '#eef0ff',
+  PURPLE: '#b58df1',
+  DARK_PURPLE: '#7d63d9',
+  NAVY: '#001A72',
+  RED: '#A41623',
+  YELLOW: '#F2AF29',
+  GREEN: '#0F956F',
+  DARK_GREEN: '#217838',
+  GRAY: '#ADB1C2',
+  KINDA_RED: '#FFB2AD',
+  DARK_SALMON: '#d97973',
+  KINDA_YELLOW: '#FFF096',
+  KINDA_GREEN: '#C4E7DB',
+  KINDA_BLUE: '#A0D5EF',
+  LIGHT_BLUE: '#5f97c8',
+  WEB_BLUE: '#1067c4',
+  ANDROID: '#34a853',
+};
+
+/* eslint-disable react-native/no-unused-styles */
+export const commonStyles = StyleSheet.create({
+  centerView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  box: {
+    height: 150,
+    width: 150,
+    borderRadius: 20,
+    marginBottom: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  ball: {
+    height: 120,
+    width: 120,
+    borderRadius: 60,
+    marginBottom: 100,
+    // @ts-expect-error `grab` is correct value for `cursor` property
+    cursor: 'grab',
+  },
+  instructions: {
+    marginTop: 8,
+    textAlign: 'center',
+    paddingHorizontal: 16,
+  },
+  subcontainer: {
+    flex: 1,
+    width: '100%',
+    gap: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 1,
+  },
+  header: {
+    fontSize: 24,
+    marginVertical: 10,
+    justifyContent: 'center',
+    textAlign: 'center',
+  },
+  row: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 40,
+    padding: 20,
+  },
+  centered: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  caption: {
+    fontSize: 12,
+    color: COLORS.GRAY,
+    fontWeight: '600',
+    marginTop: 4,
+  },
+});
+/* eslint-enable react-native/no-unused-styles */
+
+const styles = StyleSheet.create({
+  lipsum: {
+    padding: 10,
+  },
+  info_container: {
+    padding: 16,
+    backgroundColor: '#F5F7FA',
+    borderRadius: 12,
+    marginVertical: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  info_body: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#4A5568',
+  },
+  feedback: {
+    marginVertical: 10,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
+
+type Props = {
+  words: number;
+  style: StyleProp<ViewStyle>;
+};
+
+export class LoremIpsum extends React.Component<Props> {
+  static defaultProps = {
+    words: 1000,
+    style: styles.lipsum,
+  };
+  loremIpsum() {
+    return LOREM_IPSUM.split(' ').slice(0, this.props.words).join(' ');
+  }
+  render() {
+    return <Text style={this.props.style}>{this.loremIpsum()}</Text>;
+  }
+}
+
+interface InfoSectionProps {
+  description: string;
+}
+
+export function InfoSection({ description }: InfoSectionProps) {
+  return (
+    <View style={styles.info_container}>
+      <Text style={styles.info_body}>{description}</Text>
+    </View>
+  );
+}
+
+type FeedbackProps = {
+  duration?: number;
+  ref?: RefObject<FeedbackHandle | null>;
+};
+
+export type FeedbackHandle = {
+  showMessage: (message: string) => void;
+};
+
+export const Feedback = ({ duration = 1000, ref }: FeedbackProps) => {
+  const [text, setText] = useState('Feedback');
+  const timerRef = useRef<number | null>(null);
+
+  const opacity = useSharedValue(0);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  const displayMessage = useCallback(
+    (message: string) => {
+      console.log(message);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+
+      setText(message);
+      opacity.value = withTiming(1, {
+        duration: 100,
+        easing: Easing.out(Easing.ease),
+      });
+
+      timerRef.current = setTimeout(() => {
+        opacity.value = withTiming(0, {
+          duration: 500,
+          easing: Easing.out(Easing.ease),
+        });
+        timerRef.current = null;
+      }, duration) as unknown as number;
+    },
+    [duration, opacity]
+  );
+
+  useImperativeHandle(ref, () => ({
+    showMessage: (message: string) => {
+      displayMessage(message);
+    },
+  }));
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
+
+  if (!text) {
+    return null;
+  }
+
+  return (
+    <Animated.Text style={[styles.feedback, animatedStyle]}>
+      {text}
+    </Animated.Text>
+  );
+};
+
+const LOREM_IPSUM = `
+Curabitur accumsan sit amet massa quis cursus. Fusce sollicitudin nunc nisl, quis efficitur quam tristique eget. Ut non erat molestie, ullamcorper turpis nec, euismod neque. Praesent aliquam risus ultricies, cursus mi consectetur, bibendum lorem. Nunc eleifend consectetur metus quis pulvinar. In vitae lacus eu nibh tincidunt sagittis ut id lorem. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Quisque sagittis mauris rhoncus, maximus justo in, consequat dolor. Pellentesque ornare laoreet est vulputate vestibulum. Aliquam sit amet metus lorem.
+
+Morbi tempus elit lorem, ut pulvinar nunc sagittis pharetra. Nulla mi sem, elementum non bibendum eget, viverra in purus. Vestibulum efficitur ex id nisi luctus egestas. Quisque in urna vitae leo consectetur ultricies sit amet at nunc. Cras porttitor neque at nisi ornare, mollis ornare dolor pharetra. Donec iaculis lacus orci, et pharetra eros imperdiet nec. Morbi leo nunc, placerat eget varius nec, volutpat ac velit. Phasellus pulvinar vulputate tincidunt. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce elementum dui at ipsum hendrerit, vitae consectetur erat pulvinar. Sed vehicula sapien felis, id tristique dolor tempor feugiat. Aenean sit amet erat libero.
+
+Nam posuere at mi ut porttitor. Vivamus dapibus vehicula mauris, commodo pretium nibh. Mauris turpis metus, vulputate iaculis nibh eu, maximus tincidunt nisl. Vivamus in mauris nunc. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse convallis ornare finibus. Quisque leo ex, vulputate quis molestie auctor, congue nec arcu.
+
+Praesent ac risus nec augue commodo semper eu eget quam. Donec aliquam sodales convallis. Etiam interdum eu nulla at tempor. Duis nec porttitor odio, consectetur tempor turpis. Sed consequat varius lorem vel fermentum. Maecenas dictum sapien vitae lobortis tempus. Aliquam iaculis vehicula velit, non tempus est varius nec. Nunc congue dolor nec sem gravida, nec tincidunt mi luctus. Nam ut porttitor diam.
+
+Fusce interdum nisi a risus aliquet, non dictum metus cursus. Praesent imperdiet sapien orci, quis sodales metus aliquet id. Aliquam convallis pharetra erat. Fusce gravida diam ut tellus elementum sodales. Fusce varius congue neque, quis laoreet sapien blandit vestibulum. Donec congue libero sapien, nec varius risus viverra ut. Quisque eu maximus magna. Phasellus tortor nisi, tincidunt vitae dignissim nec, interdum vel mi. Ut accumsan urna finibus posuere mattis.
+`;

@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+@import 'uniwind';
+
+/* Explorer compatibility: use the released package instead of the upstream workspace source. */
+@import 'heroui-native/styles';
+
+@import './themes/lavander.css';
+@import './themes/mint.css';
+@import './themes/sky.css';
+
+/* Explorer compatibility: scan the released package instead of the upstream workspace source. */
+@source '../../../../node_modules/heroui-native/lib';
+
+/* The hosted example's utility classes must be included in the Uniwind build. */
+@source './src';
+
+@layer theme {
+  :root {
+    @variant light {
+      --font-normal: 'Inter-Regular';
+      --font-medium: 'Inter-Medium';
+      --font-semibold: 'Inter-SemiBold';
+      --font-bold: 'Inter-Bold';
+      
+      --radius: 0.5rem;
+    }
+
+    @variant dark {
+      --font-normal: 'Inter-Regular';
+      --font-medium: 'Inter-Medium';
+      --font-semibold: 'Inter-SemiBold';
+      --font-bold: 'Inter-Bold';
+
+      --radius: 0.5rem;
+    }
+  }
+}

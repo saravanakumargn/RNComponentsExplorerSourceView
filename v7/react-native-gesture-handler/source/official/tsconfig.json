@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "noImplicitOverride": false,
+    "paths": {
+      "@/*": ["./*"],
+      "react-native-gesture-handler": [
+        "../../packages/react-native-gesture-handler/src"
+      ],
+      "react-native-gesture-handler/ReanimatedSwipeable": [
+        "../../packages/react-native-gesture-handler/src/components/ReanimatedSwipeable/"
+      ],
+      "react-native-gesture-handler/ReanimatedDrawerLayout": [
+        "../../packages/react-native-gesture-handler/src/components/ReanimatedDrawerLayout.tsx"
+      ],
+      "react-native-gesture-handler/jest-utils": [
+        "../../packages/react-native-gesture-handler/src/jestUtils/index.ts"
+      ]
+    },
+    "types": ["../../packages/react-native-gesture-handler/src/global.d.ts"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "index.ts"]
+}

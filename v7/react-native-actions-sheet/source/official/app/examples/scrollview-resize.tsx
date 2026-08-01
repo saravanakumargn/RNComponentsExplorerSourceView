@@ -1,0 +1,134 @@
+import React, {useCallback} from 'react';
+import {Text, View} from 'react-native';
+import ActionSheet, {ScrollView} from 'react-native-actions-sheet';
+import {Button} from '../components/button';
+
+const vegetableNamesWithEmoji = [
+  '🍅 Tomato',
+  '🥕 Carrot',
+  '🥦 Broccoli',
+  '🥒 Cucumber',
+  '🌶️ Hot Pepper',
+  '🫑 Bell Pepper',
+  '🧄 Garlic',
+  '🧅 Onion',
+  '🍄 Mushroom',
+  '🥔 Potato',
+  '🥬 Leafy Green',
+  '🥑 Avocado',
+  '🍆 Eggplant',
+  '🥝 Kiwi Fruit',
+  '🍓 Strawberry',
+  '🍈 Melon',
+  '🍒 Cherries',
+  '🍑 Peach',
+  '🍍 Pineapple',
+  '🥭 Mango',
+  '🍉 Watermelon',
+  '🍌 Banana',
+  '🍋 Lemon',
+  '🍊 Orange',
+  '🍎 Red Apple',
+  '🍏 Green Apple',
+  '🍐 Pear',
+  '🍇 Grapes',
+  '🍉 Watermelon',
+  '🍌 Banana',
+  '🍋 Lemon',
+  '🍊 Orange',
+  '🍎 Red Apple',
+  '🍏 Green Apple',
+  '🍐 Pear',
+  '🍇 Grapes',
+  '🍉 Watermelon',
+  '🍌 Banana',
+  '🍋 Lemon',
+  '🍊 Orange',
+  '🍎 Red Apple',
+  '🍏 Green Apple',
+  '🍐 Pear',
+  '🍇 Grapes',
+  '🍉 Watermelon',
+  '🍌 Banana',
+  '🍋 Lemon',
+];
+
+function ResizeSheet() {
+  const [vegetables, setVegetables] = React.useState([
+    ...vegetableNamesWithEmoji.slice(0, 2),
+  ]);
+
+  const renderItem = useCallback(
+    (item, index) => (
+      <Text
+        key={item + index}
+        style={{
+          color: 'black',
+          fontSize: 20,
+        }}
+        children={item}
+      />
+    ),
+    [],
+  );
+
+  return (
+    <ActionSheet
+      gestureEnabled
+      containerStyle={{
+        borderWidth: 1,
+        borderColor: '#f0f0f0',
+      }}>
+      <View
+        style={{
+          paddingHorizontal: 12,
+          alignItems: 'center',
+          gap: 10,
+          width: '100%',
+          maxHeight: '100%',
+        }}>
+        <ScrollView
+          style={{
+            width: '100%',
+          }}>
+          {vegetables.map(renderItem)}
+        </ScrollView>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: 10,
+          }}>
+          <Button
+            title="+"
+            style={{
+              width: 'auto',
+              flex: 1,
+            }}
+            onPress={() => {
+              setVegetables([
+                ...vegetables,
+                vegetableNamesWithEmoji[
+                  Math.floor(Math.random() * vegetableNamesWithEmoji.length)
+                ],
+              ]);
+            }}
+          />
+
+          <Button
+            title="-"
+            onPress={() => {
+              setVegetables([...vegetables.slice(0, vegetables.length - 1)]);
+            }}
+            style={{
+              width: 'auto',
+              flex: 1,
+            }}
+          />
+        </View>
+      </View>
+    </ActionSheet>
+  );
+}
+
+export default ResizeSheet;

@@ -1,0 +1,84 @@
+import { type FC } from 'react';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
+import { Icon, type IconName } from './Icon';
+
+interface ToolbarButtonIconProps {
+  text?: never;
+  icon: IconName;
+  isActive: boolean;
+  isDisabled: boolean;
+  onPress: () => void;
+  testID?: string;
+  containerStyle?: StyleProp<ViewStyle>;
+}
+
+interface ToolbarButtonTextProps {
+  text: string;
+  icon?: never;
+  isActive: boolean;
+  isDisabled: boolean;
+  onPress: () => void;
+  testID?: string;
+  containerStyle?: StyleProp<ViewStyle>;
+}
+
+export type ToolbarButtonProps =
+  | ToolbarButtonIconProps
+  | ToolbarButtonTextProps;
+
+export const ToolbarButton: FC<ToolbarButtonProps> = ({
+  icon,
+  text,
+  isActive,
+  isDisabled,
+  onPress,
+  testID,
+  containerStyle,
+}) => {
+  return (
+    <Pressable
+      style={[
+        styles.container,
+        isActive && styles.containerActive,
+        isDisabled && styles.containerDisabled,
+        containerStyle,
+      ]}
+      disabled={isDisabled}
+      onPress={onPress}
+      testID={testID}
+    >
+      {icon ? (
+        <Icon name={icon} size={20} color="white" />
+      ) : (
+        <Text style={styles.text}>{text}</Text>
+      )}
+    </Pressable>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 56,
+    height: 56,
+    backgroundColor: 'rgba(0, 26, 114, 0.8)',
+  },
+  containerActive: {
+    backgroundColor: 'rgb(0, 26, 114)',
+  },
+  containerDisabled: {
+    backgroundColor: 'rgb(0, 26, 114)',
+    opacity: 0.3,
+  },
+  text: {
+    color: 'white',
+    fontSize: 20,
+  },
+});

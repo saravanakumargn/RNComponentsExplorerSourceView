@@ -1,0 +1,330 @@
+import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  FlatList,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+
+import Animated, {
+  Extrapolation,
+  interpolate,
+  useAnimatedProps,
+  useAnimatedStyle,
+  useSharedValue,
+  type SharedValue,
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAppTheme } from '@/contexts/app-theme-context';
+import type { UsageVariant } from './types';
+import { Text } from '@/components/ui/text';
+import {
+  BottomControlBar,
+  type ComponentItem,
+} from '@/components/custom/bottom-control-bar';
+import {
+  COMPONENTS_LIST,
+  getComponentByPath,
+} from '@/constants/components-list';
+import { useRouter, usePathname } from 'expo-router';
+const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
+const AnimatedView = Animated.createAnimatedComponent(View);
+
+type VariantNameItemProps = {
+  label: string;
+  index: number;
+  width: number;
+  scrollX: SharedValue<number>;
+  itemPositionsRef: React.MutableRefObject<number[]>;
+};
+
+const VariantNameItem = memo(
+  ({ label, index, width, scrollX, itemPositionsRef }: VariantNameItemProps) => {
+    const rVariantNameStyle = useAnimatedStyle(() => {
+      const inputRange = [
+        (index - 1) * width,
+        index * width,
+        (index + 1) * width,
+      ];
+      const opacity = interpolate(
+        scrollX.value,
+        inputRange,
+        [0.3, 1, 0.3],
+        Extrapolation.CLAMP
+      );
+      const scale = interpolate(
+        scrollX.value,
+        inputRange,
+        [0.85, 1, 0.85],
+        Extrapolation.CLAMP
+      );
+      return { opacity, transform: [{ scale }] };
+    });
+
+    return (
+      <AnimatedView
+        className="px-3"
+        style={rVariantNameStyle}
+        onLayout={(event) => {
+          const { x, width: itemWidth } = event.nativeEvent.layout;
+          itemPositionsRef.current[index] = x + itemWidth / 2;
+        }}
+      >
+        <Text className="text-foreground font-sans font-medium">
+        {label}
+        </Text>
+      </AnimatedView>
+    );
+  }
+);
+VariantNameItem.displayName = 'VariantNameItem';
+
+interface UsageVariantFlatListProps {
+  data: UsageVariant[];
+  scrollEnabled?: boolean;
+  componentPath?: string;
+}
+
+export const UsageVariantFlatList = ({
+  data,
+  scrollEnabled = true,
+  componentPath,
+}: UsageVariantFlatListProps) => {
+  const [currentVariant, setCurrentVariant] = useState<UsageVariant>(data[0]!);
+  const variantCount = data.length;
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const { isDark } = useAppTheme();
+
+  // Extract component path from pathname if not provided
+  const derivedComponentPath =
+    componentPath || pathname?.split('/').pop() || '';
+
+  const currentComponent = derivedComponentPath
+    ? getComponentByPath(derivedComponentPath)
+    : undefined;
+
+  // Handle component selection from the menu
+  const handleComponentSelect = useCallback(
+    (component: ComponentItem) => {
+      if (Platform.OS === 'ios') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+      router.push(`/(home)/components/${component.path}` as any);
+    },
+    [router]
+  );
+
+  const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
+  const itemWidth = width;
+
+  const applyBlur = Platform.OS === 'ios';
+
+  // For components that use internal horizontal FlatLists (e.g. tabs),
+  // skip the outer horizontal FlatList pager to avoid nested same-orientation
+  // FlatList conflicts. Render the first variant directly instead.
+  const isDirectRender = derivedComponentPath === 'tabs';
+
+  const listRef = useRef<FlatList<UsageVariant>>(null);
+  const variantNamesScrollRef = useRef<ScrollView>(null);
+
+  const scrollX = useSharedValue(0);
+
+  // Store item positions for accurate scrolling
+  const itemPositionsRef = useRef<number[]>([]);
+
+  const scrollVariantNamesToActive = useCallback(
+    (activeIndex: number) => {
+      if (
+        variantNamesScrollRef.current &&
+        activeIndex >= 0 &&
+        activeIndex < data.length
+      ) {
+        const itemPositions = itemPositionsRef.current;
+        if (itemPositions.length > activeIndex) {
+          const itemCenter = itemPositions[activeIndex] || 0;
+          const scrollPosition = Math.max(0, itemCenter - width / 2);
+          variantNamesScrollRef.current.scrollTo({
+            x: scrollPosition,
+            animated: true,
+          });
+        }
+      }
+    },
+    [width, data.length]
+  );
+
+  const handleViewableItemsChanged = useCallback(
+    ({
+      viewableItems,
+    }: {
+      viewableItems: Array<{ item: UsageVariant; index: number | null }>;
+    }) => {
+      if (viewableItems.length > 0 && viewableItems[0]) {
+        if (Platform.OS === 'ios') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+        const item = viewableItems[0].item;
+        const index = viewableItems[0].index ?? 0;
+        setCurrentVariant(item);
+        scrollVariantNamesToActive(index);
+      }
+    },
+    [scrollVariantNamesToActive]
+  );
+
+  // Set initial scroll position after component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollVariantNamesToActive(0);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [scrollVariantNamesToActive]);
+
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 50,
+  }).current;
+
+  // The items include React elements. Passing them through Animated.FlatList
+  // makes Reanimated try to serialize the element's FiberNode on Fabric.
+  const scrollHandler = useCallback(
+    (event: { nativeEvent: { contentOffset: { x: number } } }) => {
+      scrollX.set(event.nativeEvent.contentOffset.x);
+    },
+    [scrollX]
+  );
+
+  const animatedProps = useAnimatedProps(() => {
+    if (variantCount === 1) {
+      return {
+        intensity: 0,
+      };
+    }
+
+    const inputRange: number[] = [];
+    const outputRange: number[] = [];
+
+    for (let i = 0; i < variantCount; i++) {
+      inputRange.push(i);
+      outputRange.push(0);
+
+      if (i < variantCount - 1) {
+        inputRange.push(i + 0.5);
+        outputRange.push(30);
+      }
+    }
+
+    return {
+      intensity: interpolate(
+        scrollX.get() / itemWidth,
+        inputRange,
+        outputRange
+      ),
+    };
+  });
+
+  if (isDirectRender) {
+    return (
+      <>
+        <View className="flex-1 justify-center items-center p-4">
+          {data[0]?.content}
+        </View>
+        <BottomControlBar
+          bottomOffset={insets.bottom + 34}
+          pillLabel={currentComponent?.title}
+          showPill={true}
+          components={COMPONENTS_LIST}
+          currentComponent={currentComponent}
+          onComponentSelect={handleComponentSelect}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <FlatList
+        ref={listRef}
+        data={data}
+        renderItem={({ item }) => (
+          <View
+            className="flex items-center justify-center px-6"
+            style={{ width, height: height - 100 - insets.top }}
+          >
+            {item.content}
+          </View>
+        )}
+        keyExtractor={(item) => item.value}
+        getItemLayout={(_, index) => ({
+          length: itemWidth,
+          offset: itemWidth * index,
+          index,
+        })}
+        horizontal
+        snapToInterval={itemWidth}
+        decelerationRate="fast"
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onViewableItemsChanged={handleViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
+        scrollEnabled={scrollEnabled}
+        keyboardShouldPersistTaps="handled"
+      />
+      {applyBlur && (
+        <AnimatedBlurView
+          pointerEvents="none"
+          style={StyleSheet.absoluteFill}
+          animatedProps={animatedProps}
+          // tint={
+          //   isDark
+          //     ? 'systemUltraThinMaterialDark'
+          //     : 'systemUltraThinMaterialLight'
+          // }
+        />
+      )}
+      <View
+        className="absolute left-0 right-0 items-center top-10"
+        pointerEvents="none"
+      >
+        {/* Variant names horizontal scrollable list - active item centered, others faded */}
+        <ScrollView
+          ref={variantNamesScrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          scrollEnabled={false}
+          contentContainerStyle={{
+            alignItems: 'center',
+            paddingHorizontal: width / 2,
+          }}
+        >
+          {data.map((item, index) => (
+            <VariantNameItem
+              key={item.value}
+              label={item.label}
+              index={index}
+              width={width}
+              scrollX={scrollX}
+              itemPositionsRef={itemPositionsRef}
+            />
+          ))}
+        </ScrollView>
+      </View>
+      <BottomControlBar
+        bottomOffset={insets.bottom + 34}
+        pillLabel={currentComponent?.title}
+        showPill={true}
+        components={COMPONENTS_LIST}
+        currentComponent={currentComponent}
+        onComponentSelect={handleComponentSelect}
+      />
+    </>
+  );
+};

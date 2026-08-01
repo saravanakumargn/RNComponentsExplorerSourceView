@@ -1,0 +1,49 @@
+import * as React from "react";
+import { StyleSheet, TouchableHighlight, View } from "react-native";
+import { Link } from "expo-router";
+import { appColors } from "../consts/colors";
+import type { ChartRoute } from "../consts/routes";
+import { Text } from "./Text";
+
+type Props = {
+  item: ChartRoute;
+};
+
+export const ChartCard = ({ item }: Props) => {
+  return (
+    <Link style={{ flex: 1 }} href={'/victory-native-xl' + item.path} asChild>
+      <TouchableHighlight
+        style={styles.touchableHighlight}
+        activeOpacity={0.75}
+        underlayColor={appColors.tint}
+      >
+        <View style={styles.card}>
+          <Text style={styles.title}>{item.title}</Text>
+          <Text>{item.description}</Text>
+        </View>
+      </TouchableHighlight>
+    </Link>
+  );
+};
+
+const styles = StyleSheet.create({
+  touchableHighlight: {
+    margin: 6,
+    borderRadius: 6,
+  },
+  card: {
+    flex: 1,
+    backgroundColor: appColors.cardBackground.light,
+    borderRadius: 6,
+    padding: 15,
+    borderColor: appColors.cardBorder.light,
+    $dark: {
+      backgroundColor: appColors.cardBackground.dark,
+    },
+  },
+  title: {
+    fontWeight: "bold",
+    fontSize: 18,
+    marginBottom: 4,
+  },
+});

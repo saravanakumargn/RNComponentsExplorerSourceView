@@ -1,0 +1,425 @@
+/* eslint-disable @eslint-react/no-nested-component-definitions */
+/* eslint-disable @eslint-react/no-nested-components */
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { ParamListBase } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
+import type {
+  StackNavigationProp,
+  StackScreenProps,
+} from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
+import { Icon } from '@swmansion/icons';
+import { useEffect, useState } from 'react';
+import {
+  Dimensions,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import {
+  GestureHandlerRootView,
+  Switch,
+  Touchable,
+} from 'react-native-gesture-handler';
+import {
+  initialWindowMetrics,
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+
+import { COLORS } from './src/common';
+import { ConsoleHeaderButton, ConsoleModalProvider } from './src/console';
+import { OLD_EXAMPLES } from './src/legacy';
+import { TouchableExample } from './src/legacy/release_tests/touchables';
+import { ListWithHeader } from './src/ListWithHeader';
+import { NEW_EXAMPLES } from './src/new_api';
+
+const OPEN_LAST_EXAMPLE_KEY = 'openLastExample';
+const SHOW_LEGACY_EXAMPLES_KEY = 'showLegacyExamples';
+const LAST_EXAMPLE_KEY = 'lastExample';
+
+type RootStackParamList = {
+  Home: undefined;
+  TouchableExample: { item: string };
+} & {
+  [Screen: string]: undefined;
+};
+
+const Stack = createStackNavigator<RootStackParamList>();
+export default function App() {
+  return (
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <AppContent />
+    </SafeAreaProvider>
+  );
+}
+
+function AppContent() {
+  const [showLegacyVersion, setShowLegacyVersion] = useState(false);
+  return (
+    <GestureHandlerRootView style={styles.root}>
+      <ConsoleModalProvider>
+        <View style={styles.root}>
+          <NavigationContainer>
+            <Stack.Navigator
+              screenOptions={{
+                cardStyle: {
+                  // It's important to set height for the screen, without it scroll doesn't work on web platform.
+                  height: Dimensions.get('window').height,
+                  backgroundColor: COLORS.offWhite,
+                },
+                headerRight: () => <ConsoleHeaderButton />,
+                headerStyle: {
+                  backgroundColor: COLORS.offWhite,
+                  borderBottomColor: COLORS.headerSeparator,
+                  borderBottomWidth: 1,
+                },
+              }}>
+              <Stack.Screen
+                name="Home"
+                options={{ headerShown: false }}
+                component={MainScreen}
+              />
+              {(showLegacyVersion ? OLD_EXAMPLES : NEW_EXAMPLES)
+                .flatMap(({ data }) => data)
+                .flatMap(({ name, component }) => (
+                  <Stack.Screen
+                    key={name}
+                    name={name}
+                    getComponent={() => component}
+                    options={{ title: name }}
+                  />
+                ))}
+              <Stack.Screen
+                name="TouchableExample"
+                component={TouchableExample}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </View>
+      </ConsoleModalProvider>
+    </GestureHandlerRootView>
+  );
+
+  function navigate(
+    navigation: StackNavigationProp<ParamListBase>,
+    dest: string
+  ) {
+    AsyncStorage.setItem(LAST_EXAMPLE_KEY, dest);
+    navigation.navigate(dest);
+  }
+
+  function MainScreen({ navigation }: StackScreenProps<ParamListBase>) {
+    const insets = useSafeAreaInsets();
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+    const sections = showLegacyVersion ? OLD_EXAMPLES : NEW_EXAMPLES;
+    const filteredSections = normalizedSearchQuery
+      ? sections
+          .map((section) => ({
+            ...section,
+            data: section.data.filter(({ name }) =>
+              name.toLowerCase().includes(normalizedSearchQuery)
+            ),
+          }))
+          .filter(({ data }) => data.length > 0)
+      : sections;
+
+    useEffect(() => {
+      void AsyncStorage.multiGet([
+        OPEN_LAST_EXAMPLE_KEY,
+        LAST_EXAMPLE_KEY,
+        SHOW_LEGACY_EXAMPLES_KEY,
+      ]).then(([openLastExample, lastExample, showLegacyExamples]) => {
+        const showLegacy = showLegacyExamples[1] === 'true';
+        if (showLegacyExamples[1] != null) {
+          setShowLegacyVersion(showLegacy);
+        }
+        if (
+          showLegacy === showLegacyVersion &&
+          openLastExample[1] === 'true' &&
+          lastExample[1]
+        ) {
+          navigate(navigation, lastExample[1]);
+        }
+
+        return;
+      });
+      // we only want to run this effect once
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return (
+      <View style={styles.container}>
+        <ListWithHeader
+          style={styles.list}
+          sections={filteredSections}
+          keyExtractor={(example) => example.name}
+          ListHeaderComponent={
+            <Settings
+              searchQuery={searchQuery}
+              onChangeSearchQuery={setSearchQuery}
+            />
+          }
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>
+              No examples match “{searchQuery.trim()}”
+            </Text>
+          }
+          contentContainerStyle={{
+            paddingBottom: insets.bottom,
+            paddingTop: insets.top,
+          }}
+          renderItem={({ item }) => (
+            <MainScreenItem
+              name={item.name}
+              onPressItem={(name) => navigate(navigation, name)}
+              disabled={!!item.unsupportedPlatforms?.has(Platform.OS)}
+            />
+          )}
+          renderSectionHeader={({ section: { sectionTitle } }) => (
+            <Text style={styles.sectionTitle}>{sectionTitle}</Text>
+          )}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+        />
+      </View>
+    );
+  }
+
+  interface SettingsProps {
+    searchQuery: string;
+    onChangeSearchQuery: (query: string) => void;
+  }
+
+  function Settings({ searchQuery, onChangeSearchQuery }: SettingsProps) {
+    const [openLastExample, setOpenLastExample] = useState(false);
+
+    useEffect(() => {
+      void AsyncStorage.getItem(OPEN_LAST_EXAMPLE_KEY).then((value) => {
+        setOpenLastExample(value === 'true');
+        return;
+      });
+    }, []);
+
+    function updateKeepSetting(value: boolean) {
+      AsyncStorage.setItem(OPEN_LAST_EXAMPLE_KEY, value.toString());
+      setOpenLastExample(value);
+    }
+    function updateVersionSetting(value: boolean) {
+      AsyncStorage.setItem(SHOW_LEGACY_EXAMPLES_KEY, value.toString());
+      AsyncStorage.removeItem(LAST_EXAMPLE_KEY);
+      setShowLegacyVersion(value);
+    }
+    return (
+      <View style={styles.headerControls}>
+        <View style={styles.searchBar}>
+          <Icon name="search" size={20} color={COLORS.NAVY} />
+          <TextInput
+            testID="search-examples"
+            accessibilityLabel="Search examples"
+            autoCapitalize="none"
+            autoCorrect={false}
+            clearButtonMode="while-editing"
+            placeholder="Search examples"
+            placeholderTextColor={COLORS.GRAY}
+            returnKeyType="search"
+            selectionColor={COLORS.DARK_PURPLE}
+            style={styles.searchInput}
+            value={searchQuery}
+            onChangeText={onChangeSearchQuery}
+          />
+          {searchQuery.length > 0 && Platform.OS !== 'ios' && (
+            <Pressable
+              accessibilityLabel="Clear search"
+              hitSlop={8}
+              onPress={() => onChangeSearchQuery('')}>
+              <Icon name="cross-circle" size={20} color={COLORS.GRAY} />
+            </Pressable>
+          )}
+        </View>
+        <View style={styles.settings}>
+          <Touchable
+            androidRipple={{}}
+            underlayColor={Platform.OS === 'android' ? 'transparent' : 'black'}
+            style={styles.settingsButton}
+            onPress={() => {
+              updateKeepSetting(!openLastExample);
+            }}>
+            <View
+              style={styles.settingsButtonContent}
+              pointerEvents={Platform.OS === 'web' ? 'box-only' : 'auto'}>
+              <Text style={[styles.text, styles.aligned]}>
+                Open last example on launch
+              </Text>
+              <Switch
+                style={styles.aligned}
+                value={openLastExample}
+                onValueChange={() => {
+                  updateKeepSetting(!openLastExample);
+                }}
+              />
+            </View>
+          </Touchable>
+          <Touchable
+            androidRipple={{}}
+            underlayColor={Platform.OS === 'android' ? 'transparent' : 'black'}
+            style={styles.settingsButton}
+            onPress={() => {
+              updateVersionSetting(!showLegacyVersion);
+            }}>
+            <View
+              style={styles.settingsButtonContent}
+              pointerEvents={Platform.OS === 'web' ? 'box-only' : 'auto'}>
+              <Text style={[styles.text, styles.aligned]}>
+                Show legacy version examples
+              </Text>
+              <Switch
+                style={styles.aligned}
+                value={showLegacyVersion}
+                onValueChange={() => {
+                  updateVersionSetting(!showLegacyVersion);
+                }}
+              />
+            </View>
+          </Touchable>
+        </View>
+      </View>
+    );
+  }
+
+  interface MainScreenItemProps {
+    name: string;
+    onPressItem: (name: string) => void;
+    disabled: boolean;
+  }
+
+  function MainScreenItem({
+    name,
+    onPressItem,
+    disabled,
+  }: MainScreenItemProps) {
+    return (
+      <Touchable
+        disabled={disabled}
+        style={[styles.button, disabled && styles.unavailableExample]}
+        androidRipple={{}}
+        underlayColor={Platform.OS === 'android' ? 'transparent' : 'black'}
+        onPress={() => onPressItem(name)}>
+        <Text style={styles.text}>{name}</Text>
+        {Platform.OS !== 'macos' && !disabled && (
+          <Icon name="chevron-small-right" size={24} color="#bbb" />
+        )}
+      </Touchable>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.offWhite,
+  },
+  sectionTitle: {
+    ...(Platform.OS !== 'macos' ? { backgroundColor: '#f8f9ff' } : {}),
+    ...Platform.select({
+      ios: {
+        fontSize: 17,
+        fontWeight: '500',
+      },
+      android: {
+        fontSize: 19,
+        fontFamily: 'sans-serif-medium',
+      },
+    }),
+    padding: 16,
+    color: 'black',
+  },
+  text: {
+    color: 'black',
+  },
+  aligned: {
+    textAlign: 'center',
+    alignSelf: 'center',
+  },
+  list: {},
+  separator: {
+    height: 2,
+  },
+  emptyText: {
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+    color: COLORS.GRAY,
+    textAlign: 'center',
+  },
+  button: {
+    flex: 1,
+    height: 48,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  settingsButton: {
+    flex: 1,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    borderRadius: 10,
+    backgroundColor: '#eef0ff',
+    padding: 8,
+    justifyContent: 'center',
+    elevation: 8,
+    ...(Platform.OS !== 'macos'
+      ? {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+        }
+      : {}),
+  },
+  settingsButtonContent: {
+    flex: 1,
+    width: '100%',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unavailableExample: {
+    backgroundColor: 'rgb(220, 220, 220)',
+    opacity: 0.3,
+  },
+  settings: {
+    flexDirection: 'row',
+    gap: 24,
+  },
+  headerControls: {
+    gap: 16,
+    margin: 24,
+  },
+  searchBar: {
+    minHeight: 44,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.headerSeparator,
+    backgroundColor: '#fff',
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: Platform.OS === 'web' ? 10 : 8,
+    color: COLORS.NAVY,
+    fontSize: 16,
+  },
+});

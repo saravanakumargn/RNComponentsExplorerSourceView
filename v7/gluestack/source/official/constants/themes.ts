@@ -1,0 +1,416 @@
+export type ThemeName =
+  | 'default'
+  | 'vercel'
+  | 'violetBloom'
+  | 'supabase'
+  | 'claude'
+  | 'twitter';
+
+export type ColorMode = 'light' | 'dark' | 'system';
+
+// Helper function to calculate radius values from a base radius
+function calculateRadius(baseRadius: string) {
+  let basePx: number;
+
+  if (baseRadius.endsWith('rem')) {
+    basePx = parseFloat(baseRadius) * 16;
+  } else if (baseRadius.endsWith('px')) {
+    basePx = parseFloat(baseRadius);
+  } else {
+    basePx = 8;
+  }
+
+  return {
+    '--radius': `${basePx}px`,
+    '--radius-sm': `${Math.max(0, basePx - 2)}px`,
+    '--radius-md': `${Math.max(0, basePx)}px`,
+    '--radius-lg': `${Math.max(0, basePx + 2)}px`,
+    '--radius-xl': `${Math.max(0, basePx + 4)}px`,
+  };
+}
+
+export type ThemeVars = Record<string, string>;
+
+// Theme configurations using shadcn-style tokens.
+// Raw CSS variable objects — consumed by VariableContextProvider (NativeWind v5).
+export const themeConfigs: Record<
+  ThemeName,
+  { name: string; description: string; light: ThemeVars; dark: ThemeVars }
+> = {
+  default: {
+    name: 'Default',
+    description: 'Gluestack UI default theme',
+    light: {
+      '--primary': '23 23 23',
+      '--primary-foreground': '250 250 250',
+      '--card': '255 255 255',
+      '--secondary': '245 245 245',
+      '--secondary-foreground': '23 23 23',
+      '--background': '255 255 255',
+      '--popover': '255 255 255',
+      '--popover-foreground': '10 10 10',
+      '--muted': '245 245 245',
+      '--muted-foreground': '115 115 115',
+      '--destructive': '231 0 11',
+      '--foreground': '10 10 10',
+      '--border': '229 229 229',
+      '--input': '229 229 229',
+      '--ring': '212 212 212',
+      '--accent': '247 247 247',
+      '--accent-foreground': '52 52 52',
+      '--card-foreground': '10 10 10',
+      ...calculateRadius('0.625rem'),
+    },
+    dark: {
+      '--primary-foreground': '23 23 23',
+      '--primary': '255 245 245',
+      '--card': '23 23 23',
+      '--foreground': '250 250 250',
+      '--popover': '23 23 23',
+      '--popover-foreground': '250 250 250',
+      '--secondary': '38 38 38',
+      '--secondary-foreground': '250 250 250',
+      '--destructive': '255 100 103',
+      '--background': '10 10 10',
+      '--input': '46 46 46',
+      '--border': '46 46 46',
+      '--ring': '115 115 115',
+      '--accent': '38 38 38',
+      '--accent-foreground': '250 250 250',
+      '--muted': '38 38 38',
+      '--muted-foreground': '161 161 161',
+      '--card-foreground': '250 250 250',
+      ...calculateRadius('0.625rem'),
+    },
+  },
+  vercel: {
+    name: 'Vercel',
+    description: 'Minimalist black and white',
+    light: {
+      '--primary': '0 0 0',
+      '--primary-foreground': '255 255 255',
+      '--secondary': '250 250 250',
+      '--secondary-foreground': '0 0 0',
+      '--background': '255 255 255',
+      '--foreground': '0 0 0',
+      '--card': '255 255 255',
+      '--card-foreground': '0 0 0',
+      '--popover': '255 255 255',
+      '--popover-foreground': '0 0 0',
+      '--muted': '245 245 245',
+      '--muted-foreground': '82 82 82',
+      '--accent': '245 245 245',
+      '--accent-foreground': '23 23 23',
+      '--destructive': '239 68 68',
+      '--border': '229 229 229',
+      '--input': '229 229 229',
+      '--ring': '0 0 0',
+      '--font-sans': 'Geist',
+      '--font-serif': 'Georgia',
+      '--font-mono':
+        'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+      ...calculateRadius('0.5rem'),
+    },
+    dark: {
+      '--primary': '255 255 255',
+      '--primary-foreground': '0 0 0',
+      '--secondary': '23 23 23',
+      '--secondary-foreground': '255 255 255',
+      '--background': '0 0 0',
+      '--foreground': '255 255 255',
+      '--card': '10 10 10',
+      '--card-foreground': '255 255 255',
+      '--popover': '10 10 10',
+      '--popover-foreground': '255 255 255',
+      '--muted': '38 38 38',
+      '--muted-foreground': '163 163 163',
+      '--accent': '38 38 38',
+      '--accent-foreground': '250 250 250',
+      '--destructive': '248 113 113',
+      '--border': '38 38 38',
+      '--input': '38 38 38',
+      '--ring': '164 164 164',
+      '--font-sans': 'Geist',
+      '--font-serif': 'Georgia',
+      '--font-mono':
+        'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+      ...calculateRadius('0.5rem'),
+    },
+  },
+  violetBloom: {
+    name: 'Violet Bloom',
+    description: 'Purple and violet tones',
+    light: {
+      '--primary': '112 51 255',
+      '--primary-foreground': '255 255 255',
+      '--secondary': '237 240 244',
+      '--secondary-foreground': '8 8 8',
+      '--background': '253 253 253',
+      '--foreground': '0 0 0',
+      '--card': '253 253 253',
+      '--card-foreground': '0 0 0',
+      '--popover': '252 252 252',
+      '--popover-foreground': '0 0 0',
+      '--muted': '245 245 245',
+      '--muted-foreground': '82 82 82',
+      '--accent': '226 235 255',
+      '--accent-foreground': '30 105 220',
+      '--destructive': '229 75 79',
+      '--border': '231 231 238',
+      '--input': '235 235 235',
+      '--ring': '0 0 0',
+      '--font-sans': 'Jakarta',
+      '--font-serif': 'Lora_400Regular',
+      '--font-mono':
+        'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+      ...calculateRadius('1.4rem'),
+    },
+    dark: {
+      '--primary': '140 92 255',
+      '--primary-foreground': '255 255 255',
+      '--secondary': '42 44 51',
+      '--secondary-foreground': '240 240 240',
+      '--background': '26 27 30',
+      '--foreground': '240 240 240',
+      '--card': '34 35 39',
+      '--card-foreground': '240 240 240',
+      '--popover': '34 35 39',
+      '--popover-foreground': '240 240 240',
+      '--muted': '42 44 51',
+      '--muted-foreground': '160 160 160',
+      '--accent': '30 41 59',
+      '--accent-foreground': '121 192 255',
+      '--destructive': '248 113 113',
+      '--border': '51 53 58',
+      '--input': '51 53 58',
+      '--ring': '140 92 255',
+      '--font-sans': 'Jakarta',
+      '--font-serif': 'Lora_400Regular',
+      '--font-mono':
+        'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+      ...calculateRadius('1.4rem'),
+    },
+  },
+  supabase: {
+    name: 'Supabase',
+    description: 'Fresh green accent colors',
+    light: {
+      '--primary': '114 227 173',
+      '--primary-foreground': '30 39 35',
+      '--secondary': '253 253 253',
+      '--secondary-foreground': '23 23 23',
+      '--background': '252 252 252',
+      '--foreground': '23 23 23',
+      '--card': '252 252 252',
+      '--card-foreground': '23 23 23',
+      '--popover': '252 252 252',
+      '--popover-foreground': '82 82 82',
+      '--muted': '237 237 237',
+      '--muted-foreground': '32 32 32',
+      '--accent': '237 237 237',
+      '--accent-foreground': '32 32 32',
+      '--destructive': '202 50 20',
+      '--border': '223 223 223',
+      '--input': '246 246 246',
+      '--ring': '114 227 173',
+      '--font-sans': 'Outfit_400Regular',
+      '--font-serif': 'Outfit_400Regular',
+      '--font-mono': 'Outfit_400Regular',
+      ...calculateRadius('0.5rem'),
+    },
+    dark: {
+      '--primary': '0 98 57',
+      '--primary-foreground': '221 232 227',
+      '--secondary': '36 36 36',
+      '--secondary-foreground': '250 250 250',
+      '--background': '18 18 18',
+      '--foreground': '226 232 240',
+      '--card': '23 23 23',
+      '--card-foreground': '226 232 240',
+      '--popover': '36 36 36',
+      '--popover-foreground': '169 169 169',
+      '--muted': '31 31 31',
+      '--muted-foreground': '162 162 162',
+      '--accent': '49 49 49',
+      '--accent-foreground': '250 250 250',
+      '--destructive': '84 28 21',
+      '--border': '41 41 41',
+      '--input': '41 41 41',
+      '--ring': '74 222 128',
+      '--font-sans': 'Outfit_400Regular',
+      '--font-serif': 'Outfit_400Regular',
+      '--font-mono': 'Outfit_400Regular',
+      ...calculateRadius('0.5rem'),
+    },
+  },
+  claude: {
+    name: 'Claude',
+    description: 'Warm terracotta and earthy tones',
+    light: {
+      '--primary': '201 100 66',
+      '--primary-foreground': '255 255 255',
+      '--secondary': '233 230 220',
+      '--secondary-foreground': '83 81 70',
+      '--background': '250 249 245',
+      '--foreground': '61 57 41',
+      '--card': '250 249 245',
+      '--card-foreground': '20 20 19',
+      '--popover': '255 255 255',
+      '--popover-foreground': '40 38 27',
+      '--muted': '237 233 222',
+      '--muted-foreground': '131 130 125',
+      '--accent': '233 230 220',
+      '--accent-foreground': '40 38 27',
+      '--destructive': '20 20 19',
+      '--border': '218 217 212',
+      '--input': '180 178 167',
+      '--ring': '201 100 66',
+      ...calculateRadius('0.5rem'),
+    },
+    dark: {
+      '--primary': '217 119 87',
+      '--primary-foreground': '255 255 255',
+      '--secondary': '250 249 245',
+      '--secondary-foreground': '48 48 46',
+      '--background': '38 38 36',
+      '--foreground': '195 192 182',
+      '--card': '38 38 36',
+      '--card-foreground': '250 249 245',
+      '--popover': '48 48 46',
+      '--popover-foreground': '229 229 226',
+      '--muted': '27 27 25',
+      '--muted-foreground': '183 181 169',
+      '--accent': '26 25 21',
+      '--accent-foreground': '245 244 238',
+      '--destructive': '239 68 68',
+      '--border': '62 62 56',
+      '--input': '82 81 74',
+      '--ring': '217 119 87',
+      ...calculateRadius('0.5rem'),
+    },
+  },
+  twitter: {
+    name: 'Twitter',
+    description: 'Classic Twitter blue',
+    light: {
+      '--primary': '30 157 241',
+      '--primary-foreground': '255 255 255',
+      '--secondary': '15 20 25',
+      '--secondary-foreground': '255 255 255',
+      '--background': '255 255 255',
+      '--foreground': '15 20 25',
+      '--card': '247 248 248',
+      '--card-foreground': '15 20 25',
+      '--popover': '255 255 255',
+      '--popover-foreground': '15 20 25',
+      '--muted': '229 229 230',
+      '--muted-foreground': '15 20 25',
+      '--accent': '227 236 246',
+      '--accent-foreground': '30 157 241',
+      '--destructive': '244 33 46',
+      '--border': '225 234 239',
+      '--input': '247 249 250',
+      '--ring': '29 161 242',
+      '--font-sans': 'OpenSans_400Regular',
+      '--font-serif': 'Georgia',
+      '--font-mono': 'Menlo, monospace',
+      ...calculateRadius('1.3rem'),
+    },
+    dark: {
+      '--primary': '28 156 240',
+      '--primary-foreground': '255 255 255',
+      '--secondary': '240 243 244',
+      '--secondary-foreground': '15 20 25',
+      '--background': '0 0 0',
+      '--foreground': '231 233 234',
+      '--card': '23 24 28',
+      '--card-foreground': '217 217 217',
+      '--popover': '0 0 0',
+      '--popover-foreground': '231 233 234',
+      '--muted': '24 24 24',
+      '--muted-foreground': '114 118 122',
+      '--accent': '6 22 34',
+      '--accent-foreground': '28 156 240',
+      '--destructive': '244 33 46',
+      '--border': '36 38 40',
+      '--input': '36 38 40',
+      '--ring': '29 161 242',
+      '--font-sans': 'OpenSans_400Regular',
+      '--font-serif': 'Georgia',
+      '--font-mono': 'Menlo',
+      ...calculateRadius('1.3rem'),
+    },
+  },
+};
+
+export const themeNames: ThemeName[] = Object.keys(themeConfigs) as ThemeName[];
+
+// Font mapping for each theme and mode
+const themeFonts: Record<ThemeName, { light: string; dark: string }> = {
+  default: {
+    light: 'Outfit_400Regular',
+    dark: 'Outfit_400Regular',
+  },
+  vercel: {
+    light: 'Outfit_400Regular',
+    dark: 'Outfit_600SemiBold',
+  },
+  violetBloom: {
+    light: 'Lora_500Medium',
+    dark: 'Lora_500Medium',
+  },
+  supabase: {
+    light: 'Andika_400Regular',
+    dark: 'Andika_700Bold',
+  },
+  claude: {
+    light: 'system',
+    dark: 'system',
+  },
+  twitter: {
+    light: 'Georgia',
+    dark: 'Georgia',
+  },
+};
+
+export function getThemeVars(
+  theme: ThemeName,
+  mode: ColorMode,
+  colorScheme: string | null | undefined = null
+): ThemeVars {
+  const resolvedMode =
+    mode === 'system' ? (colorScheme === 'dark' ? 'dark' : 'light') : mode;
+  if (
+    !theme ||
+    !resolvedMode ||
+    !themeConfigs[theme] ||
+    !themeConfigs[theme][resolvedMode as 'light' | 'dark']
+  ) {
+    console.warn(
+      `Invalid theme config: theme=${theme}, mode=${resolvedMode}, falling back to default`
+    );
+    return themeConfigs['default']['light'];
+  }
+  return themeConfigs[theme][resolvedMode as 'light' | 'dark'];
+}
+
+export function getThemeFontSans(
+  theme: ThemeName,
+  mode: ColorMode,
+  colorScheme: string | null | undefined = null
+): string {
+  const resolvedMode =
+    mode === 'system' ? (colorScheme === 'dark' ? 'dark' : 'light') : mode;
+  if (!theme || !resolvedMode) {
+    console.warn(
+      `Invalid theme font config: theme=${theme}, mode=${resolvedMode}, falling back to default`
+    );
+    return 'Outfit_400Regular';
+  }
+  if (theme === 'claude') {
+    return 'system';
+  }
+  return (
+    themeFonts[theme]?.[resolvedMode as 'light' | 'dark'] || 'Outfit_400Regular'
+  );
+}

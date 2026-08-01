@@ -1,0 +1,399 @@
+export type ChartRoute = {
+  title: string;
+  description: string;
+  path: string;
+  url?: string;
+};
+
+export const ChartRoutes: ChartRoute[] = [
+  {
+    title: "Line Chart",
+    description:
+      "This chart shows off a line with scatter points. This view also features Victory’s extensive customization options for the grid, axis chart, colors, and curve.",
+    path: "/line-chart",
+  },
+  {
+    title: "AreaRange Chart",
+    description: "This chart demonstrates the AreaRange",
+    path: "/area-range",
+  },
+  {
+    title: "Constant Line Chart",
+    description: "This chart shows off constant lines with scatter points. ",
+    path: "/constant-line-chart",
+  },
+  {
+    title: "Bar Chart",
+    description:
+      "This is a single Bar chart in Victory that supports customized spacing between each bar as well as pan/zoom.",
+    path: "/bar-chart",
+  },
+  {
+    title: "Horizontal Bar Chart",
+    description:
+      "This chart renders categories on the vertical axis and numeric values on the horizontal axis.",
+    path: "/horizontal-bar",
+  },
+  {
+    title: "Horizontal Bar Group",
+    description:
+      "This chart renders grouped horizontal bars with multiple value series per category.",
+    path: "/horizontal-bar-group",
+  },
+  {
+    title: "Horizontal Stacked Bar",
+    description:
+      "This chart renders stacked horizontal bars with positive and negative value segments.",
+    path: "/horizontal-stacked-bar",
+  },
+  {
+    title: "Horizontal Stacked Row Headers",
+    description:
+      "This chart uses custom axis label rendering to place row headers above horizontal stacked bars.",
+    path: "/horizontal-stacked-row-headers",
+  },
+  {
+    title: "Bar Group",
+    description:
+      "This chart demonstrates grouping and displaying multiple sets of data in a Bar chart. Victory supports customizing the spacing between each bar inside the group and spacing around the groups.",
+    path: "/bar-group",
+  },
+  {
+    title: "Bar Group with Tooltip",
+    description:
+      "This chart demonstrates a Bar Group chart with a custom tooltip.",
+    path: "/bar-with-tooltip",
+  },
+  {
+    title: "Negative Bar Charts",
+    description:
+      "These charts demonstrate how negative values look with Bar, Bar Group and Stacked Bar charts.",
+    path: "/negative-bar-charts",
+  },
+  {
+    title: "Bar Charts Custom Bar",
+    description: "These charts demonstrate how to customize individual bars.",
+    path: "/bar-charts-custom-bars",
+  },
+  {
+    title: "Stacked Bar Charts (Simple)",
+    description: "This is a Stacked Bar chart in Victory Native.",
+    path: "/stacked-bar-charts",
+  },
+  {
+    title: "Stacked Bar Charts (Complex)",
+    description: "More complicated Stacked Bar charts in Victory Native.",
+    path: "/stacked-bar-charts-complex",
+  },
+  {
+    title: "Scatter Plot",
+    description:
+      "This is a Scatter plot in Victory Native that supports custom shapes and sizes.",
+    path: "/scatter",
+  },
+  {
+    title: "Custom Drawing",
+    description:
+      "Victory provides the developer full access to all the transformed data points. This chart shows off using that data to draw custom shapes using Skia directly in Victory.",
+    path: "/custom-drawing",
+  },
+  {
+    title: "Stock Price",
+    description:
+      "This chart shows off Victory’s support for large datasets and multi-touch interactions. You can use Victory’s active press array to support single or multi-touch.",
+    path: "/stock-price",
+  },
+  {
+    title: "Candlestick Chart",
+    description:
+      "This chart renders open, high, low, and close values as candlesticks with scrub interaction, custom styling, and doji/missing-value examples.",
+    path: "/candlestick",
+  },
+  {
+    title: "Ordinal Data",
+    description:
+      "This chart shows off ordinal data and touch events. Tap different x axis points to see the highlighted dot move. The color changes based on interpolating the color from the transformed and range data.",
+    path: "/ordinal-data",
+  },
+  {
+    title: "Horizontal bands background",
+    description: `Custom horizontal bands background for a chart line, implemented through a custom shader.`,
+    path: "/horizontal-bands-line",
+  },
+  {
+    title: "Axis Configuration",
+    description:
+      "This shows off the various ways to configure custom axis rendering.",
+    path: "/axis-configuration",
+  },
+  {
+    title: "Axis Label Renderers",
+    description:
+      "Examples for paragraph, multilingual, multiline, and custom measured axis labels.",
+    path: "/axis-label-renderers",
+  },
+  {
+    title: "Axis Title Layout",
+    description:
+      "Examples for single-line and multiline Y-axis title placement on numeric and category axes.",
+    path: "/axis-title-layout",
+  },
+  {
+    title: "Multiple Y Axes",
+    description: "This shows how to use multiple y axes in a single chart",
+    path: "/multiple-y-axes",
+  },
+  {
+    title: "Custom Shaders",
+    description:
+      "This chart showcases using custom shaders from Skia, leveraging shader uniforms derived from Reanimated shared values.",
+    path: "/custom-shaders",
+  },
+  {
+    title: "Pie Chart",
+    description:
+      "This is a Pie chart in Victory. It has support for customizing each slice and adding insets as well as pan/zoom",
+    path: "/pie-chart",
+  },
+  {
+    title: "Donut Chart",
+    description:
+      "This is how to make a Donut chart in Victory. It is built off of the Pie chart using the `innerRadius` prop.",
+    path: "/donut-chart",
+  },
+  {
+    title: "Pie and Donut Assortment",
+    description:
+      "This is mixture of Pie and Donut charts, showing off the different ways to customize the charts.",
+    path: "/pie-and-donut-charts",
+  },
+  {
+    title: "Dashed Axes",
+    description: "This is an Area chart with dashed X and Y axes.",
+    path: "/dashed-axes",
+  },
+  {
+    title: "Stacked Area (very simple)",
+    description: "This is a very simple Stacked Area chart",
+    path: "/stacked-area",
+  },
+  {
+    title: "Stacked Area (complex)",
+    description: "This is a more complicated Stacked Area chart",
+    path: "/stacked-area-complex",
+  },
+  {
+    title: "Pan Zoom",
+    description: "This is an example of pan zoom functionality",
+    path: "/pan-zoom",
+  },
+  {
+    title: "Custom Gesture",
+    description: "Basic chart example with a custom tap gesture.",
+    path: "/custom-gesture",
+  },
+  {
+    title: "Scroll",
+    description: "Show example of scrolling chart data.",
+    path: "/scroll",
+  },
+  {
+    title: "Scroll + Scrub",
+    description: "Show example of scrolling/panning + scrubbing chart values.",
+    path: "/scroll-scrub",
+  },
+  {
+    title: "Chart Refs",
+    description: "This example demonstrates chart interactions using refs.",
+    path: "/chart-refs",
+  },
+];
+
+if (__DEV__) {
+  ChartRoutes.unshift(
+    {
+      title: "Coordinate Debug",
+      description:
+        "Debug fixture for Cartesian press coordinate mapping in nested and transformed charts.",
+      path: "/coordinate-debug",
+    },
+    {
+      title: "Transform Stroke Debug",
+      description:
+        "Debug fixture for keeping stroke width stable while a chart is transformed.",
+      path: "/transform-stroke-debug",
+    },
+    {
+      title: "Context Bridge Debug",
+      description:
+        "Debug fixture for React context access from Cartesian chart children.",
+      path: "/context-bridge-debug",
+    },
+    {
+      title: "Memory Stress Debug",
+      description:
+        "Debug fixture for live Cartesian updates, animation, and mount cycling.",
+      path: "/memory-stress-debug",
+    },
+    {
+      title: "Pie Animation Stress Debug",
+      description:
+        "Debug fixture for comparing multiple animated and static pie updates.",
+      path: "/pie-animation-stress-debug",
+    },
+    {
+      title: "Axis Debug",
+      description: "Debug fixture for x-axis label positioning at chart edges.",
+      path: "/axis-debug",
+    },
+    {
+      title: "Axis Rescaling Debug",
+      description:
+        "Debug fixture for fixed versus rescaled x-axis ticks while panning.",
+      path: "/axis-rescaling-debug",
+    },
+    {
+      title: "Bar Edge Debug",
+      description:
+        "Debug fixture for dynamic bar counts and centered edge bar overflow.",
+      path: "/bar-edge-debug",
+    },
+    {
+      title: "Pan Config Debug",
+      description:
+        "Debug fixture for chart press pan configuration passthrough.",
+      path: "/pan-config-debug",
+    },
+    {
+      title: "Scroll Transform Press Debug",
+      description:
+        "Debug fixture for chart press and transform pan gestures inside a scroll view.",
+      path: "/scroll-transform-press-debug",
+    },
+    {
+      title: "Press State Reset Debug",
+      description:
+        "Debug fixture for resetting chart press state when chart data changes.",
+      path: "/press-state-reset-debug",
+    },
+    {
+      title: "Press Race Debug",
+      description: "Debug fixture for stale long-press bootstrap touch replay.",
+      path: "/press-race-debug",
+    },
+    {
+      title: "Getting Started Guide",
+      description: "Basic chart example with a line chart and a tooltip.",
+      url: "https://formidable.com/open-source/victory-native/getting-started",
+      path: "/guides/getting-started",
+    },
+    {
+      title: "Multi-Press Guide",
+      description: "Guide for supporting multi-press interactions.",
+      url: "https://formidable.com/open-source/victory-native/cartesian/guides/multi-press",
+      path: "/guides/multi-press",
+    },
+    {
+      title: "Missing Data",
+      description: "Example showing missing data points.",
+      path: "/missing-data",
+    },
+    {
+      title: "Scrolling Charts with Gestures",
+      description:
+        "This page shows multiple charts with gestures inside a scrollview to ensure both platforms allow for this behavior.",
+      path: "/scrollview-charts",
+    },
+  );
+}
+
+export const descriptionForRoute = (path: string) =>
+  ChartRoutes.find((r) => r.path.includes(path))?.description || "";
+
+export const urlForRoute = (path: string) =>
+  ChartRoutes.find((r) => r.path.includes(path))?.url;
+
+const ChartRouteSectionOrder = [
+  "Bar Charts",
+  "Line, Area & Point Charts",
+  "Pie & Donut Charts",
+  "Axes & Labels",
+  "Interaction & Gestures",
+  "Custom Rendering",
+  "Guides",
+  "Debug Fixtures",
+  "Other Examples",
+] as const;
+
+export type ChartRouteSectionTitle = (typeof ChartRouteSectionOrder)[number];
+
+export type ChartRouteSection = {
+  title: ChartRouteSectionTitle;
+  data: ChartRoute[];
+};
+
+export const getChartRouteSections = (
+  routes: ChartRoute[] = ChartRoutes,
+): ChartRouteSection[] =>
+  ChartRouteSectionOrder.map((title) => ({
+    title,
+    data: routes
+      .filter((route) => getChartRouteSection(route) === title)
+      .sort((a, b) => a.title.localeCompare(b.title)),
+  })).filter((section) => section.data.length > 0);
+
+const getChartRouteSection = ({
+  path,
+  title,
+}: ChartRoute): ChartRouteSectionTitle => {
+  if (path.endsWith("-debug") || title.includes("Debug")) {
+    return "Debug Fixtures";
+  }
+
+  if (path.startsWith("/guides")) return "Guides";
+
+  if (
+    path === "/horizontal-stacked-row-headers" ||
+    (path.includes("bar") && path !== "/horizontal-bands-line")
+  ) {
+    return "Bar Charts";
+  }
+
+  if (path.includes("pie") || path.includes("donut")) {
+    return "Pie & Donut Charts";
+  }
+
+  if (
+    path.includes("axis") ||
+    path === "/dashed-axes" ||
+    path === "/multiple-y-axes"
+  ) {
+    return "Axes & Labels";
+  }
+
+  if (
+    path.includes("gesture") ||
+    path.includes("pan") ||
+    path.includes("scroll") ||
+    path === "/chart-refs"
+  ) {
+    return "Interaction & Gestures";
+  }
+
+  if (path.includes("custom") || path === "/horizontal-bands-line") {
+    return "Custom Rendering";
+  }
+
+  if (
+    path.includes("area") ||
+    path.includes("line") ||
+    path.includes("scatter") ||
+    path === "/missing-data" ||
+    path === "/ordinal-data" ||
+    path === "/stock-price"
+  ) {
+    return "Line, Area & Point Charts";
+  }
+
+  return "Other Examples";
+};
