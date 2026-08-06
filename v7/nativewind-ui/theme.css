@@ -1,0 +1,108 @@
+/* NativeWindUI theme tokens for the explorer.
+
+   Explorer adaptations of the upstream global.css:
+
+   1. Upstream is Tailwind v3 -- @tailwind directives plus a tailwind.config.js
+      that wraps every color in rgb of a var. The explorer is Tailwind v4 driven
+      by Uniwind, so the palette is expressed as complete colors and mapped
+      through the shared "--color-x: var(--x)" tokens in styles/explorer.css.
+
+   2. Upstream chooses its iOS or Android palette inside the Tailwind config via
+      NativeWind's platformSelect, which has no Tailwind v4 / Uniwind equivalent
+      -- there is no platform media query at the CSS layer. The two palettes are
+      therefore registered as separate themes, and the demo host selects between
+      them with Platform.OS, preserving upstream colors on both platforms.
+
+   Regenerate rather than hand-edit when upstream changes its palette. */
+
+@layer theme {
+  :root {
+    @variant nativewindui-light {
+      --background: rgb(242 242 247);
+      --foreground: rgb(0 0 0);
+      --card: rgb(255 255 255);
+      --card-foreground: rgb(8 28 30);
+      --popover: rgb(230 230 235);
+      --popover-foreground: rgb(0 0 0);
+      --primary: rgb(0 123 254);
+      --primary-foreground: rgb(255 255 255);
+      --secondary: rgb(45 175 231);
+      --secondary-foreground: rgb(255 255 255);
+      --muted: rgb(175 176 180);
+      --muted-foreground: rgb(142 142 147);
+      --accent: rgb(255 40 84);
+      --accent-foreground: rgb(255 255 255);
+      --destructive: rgb(255 56 43);
+      --destructive-foreground: rgb(255 255 255);
+      --border: rgb(230 230 235);
+      --input: rgb(210 210 215);
+      --ring: rgb(230 230 235);
+    }
+
+    @variant nativewindui-dark {
+      --background: rgb(0 0 0);
+      --foreground: rgb(255 255 255);
+      --card: rgb(21 21 24);
+      --card-foreground: rgb(255 255 255);
+      --popover: rgb(40 40 42);
+      --popover-foreground: rgb(255 255 255);
+      --primary: rgb(3 133 255);
+      --primary-foreground: rgb(255 255 255);
+      --secondary: rgb(100 211 254);
+      --secondary-foreground: rgb(255 255 255);
+      --muted: rgb(70 70 73);
+      --muted-foreground: rgb(142 142 147);
+      --accent: rgb(255 52 95);
+      --accent-foreground: rgb(255 255 255);
+      --destructive: rgb(254 67 54);
+      --destructive-foreground: rgb(255 255 255);
+      --border: rgb(40 40 42);
+      --input: rgb(55 55 57);
+      --ring: rgb(40 40 42);
+    }
+
+    @variant nativewindui-android-light {
+      --background: rgb(249 249 255);
+      --foreground: rgb(0 0 0);
+      --card: rgb(255 255 255);
+      --card-foreground: rgb(24 28 35);
+      --popover: rgb(215 217 228);
+      --popover-foreground: rgb(0 0 0);
+      --primary: rgb(0 112 233);
+      --primary-foreground: rgb(255 255 255);
+      --secondary: rgb(176 201 255);
+      --secondary-foreground: rgb(20 55 108);
+      --muted: rgb(193 198 215);
+      --muted-foreground: rgb(65 71 84);
+      --accent: rgb(169 73 204);
+      --accent-foreground: rgb(255 255 255);
+      --destructive: rgb(186 26 26);
+      --destructive-foreground: rgb(255 255 255);
+      --border: rgb(215 217 228);
+      --input: rgb(210 210 215);
+      --ring: rgb(215 217 228);
+    }
+
+    @variant nativewindui-android-dark {
+      --background: rgb(0 0 0);
+      --foreground: rgb(255 255 255);
+      --card: rgb(16 19 27);
+      --card-foreground: rgb(224 226 237);
+      --popover: rgb(39 42 50);
+      --popover-foreground: rgb(224 226 237);
+      --primary: rgb(3 133 255);
+      --primary-foreground: rgb(255 255 255);
+      --secondary: rgb(28 60 114);
+      --secondary-foreground: rgb(189 209 255);
+      --muted: rgb(216 226 255);
+      --muted-foreground: rgb(139 144 160);
+      --accent: rgb(83 0 111);
+      --accent-foreground: rgb(238 177 255);
+      --destructive: rgb(147 0 10);
+      --destructive-foreground: rgb(255 255 255);
+      --border: rgb(39 42 50);
+      --input: rgb(55 55 57);
+      --ring: rgb(39 42 50);
+    }
+  }
+}
