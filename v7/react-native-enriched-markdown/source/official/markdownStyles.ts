@@ -87,6 +87,24 @@ export const customMarkdownStyle: MarkdownStyle = {
     padding: 16,
     lineHeight: Platform.select({ ios: 20, android: 22, default: 22 }),
     marginBottom: 16,
+    // Tree-sitter token colouring, added in v1.0.0. Tuned for the dark
+    // #1f2937 block above; without it every token renders in `color`.
+    syntaxColors: {
+      keyword: '#c084fc',
+      operator: '#f472b6',
+      punctuation: '#9ca3af',
+      string: '#86efac',
+      number: '#fdba74',
+      constant: '#fdba74',
+      comment: '#6b7280',
+      function: '#60a5fa',
+      type: '#5eead4',
+      variable: '#f3f4f6',
+      property: '#93c5fd',
+      tag: '#f87171',
+      attribute: '#fcd34d',
+      embedded: '#e9d5ff',
+    },
   },
   code: {
     color: '#7c3aed',
