@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const MAIN_COLOR = '#BEEBD0';
@@ -9,6 +10,7 @@ type Props = {
   canGoBack: boolean;
   onBack: () => void;
   onPress: () => void;
+  headerRight?: ReactNode;
 };
 
 export function ChannelHeader({
@@ -17,6 +19,7 @@ export function ChannelHeader({
   canGoBack,
   onBack,
   onPress,
+  headerRight,
 }: Props) {
   return (
     <View style={[styles.header, { paddingTop: topInset + 4 }]}>
@@ -36,6 +39,7 @@ export function ChannelHeader({
         <Text style={styles.name}>#{channel}</Text>
         <Text style={styles.status}>4 members · tap to switch</Text>
       </TouchableOpacity>
+      {headerRight}
     </View>
   );
 }

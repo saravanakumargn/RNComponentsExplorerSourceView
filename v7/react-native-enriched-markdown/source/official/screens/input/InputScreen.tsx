@@ -9,6 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ViewSourceButton } from '@/features/source-viewer/view-source-button';
 import { MessageBubble } from './MessageBubble';
 import { UnreadDivider } from './UnreadDivider';
 import { ChannelHeader } from './ChannelHeader';
@@ -87,6 +88,15 @@ export default function InputScreen({ navigation, route }: Props) {
         canGoBack={navigation.canGoBack()}
         onBack={() => navigation.goBack()}
         onPress={() => setChannelPickerVisible(true)}
+        headerRight={
+          <ViewSourceButton
+            demoId="react-native-enriched-markdown"
+            iconOnly
+            title="InputScreen.tsx source"
+            initialPath="features/react-native-enriched-markdown/source/official/screens/input/InputScreen.tsx"
+            onlyInitialPath
+          />
+        }
       />
       <ChannelPickerModal
         visible={channelPickerVisible}

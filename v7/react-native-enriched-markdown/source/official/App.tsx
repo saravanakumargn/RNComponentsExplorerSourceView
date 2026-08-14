@@ -5,9 +5,26 @@ import PlaygroundScreen from './screens/playground/PlaygroundScreen';
 import TextScreen from './screens/text/TextScreen';
 import InputScreen from './screens/input/InputScreen';
 import StreamingMarkdownSimulator from './screens/streaming/StreamingMarkdownSimulator';
-import StorybookScreen from './screens/storybook/StorybookScreen';
+import { DemoBackButton } from '@/components/demo-back-button';
+import { ViewSourceButton } from '@/features/source-viewer/view-source-button';
 
-export default function App() {
+function sourceHeaderRight(initialPath: string, title: string) {
+  return () => (
+    <ViewSourceButton
+      demoId="react-native-enriched-markdown"
+      iconOnly
+      title={title}
+      initialPath={initialPath}
+      onlyInitialPath
+    />
+  );
+}
+
+type AppProps = {
+  onBackToCatalog?: () => void;
+};
+
+export default function App({ onBackToCatalog }: AppProps) {
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -26,17 +43,40 @@ export default function App() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{ title: 'Enriched Markdown Examples' }}
+          options={{
+            title: 'Enriched Markdown Examples',
+            headerLeft: onBackToCatalog
+              ? ({ tintColor }) => (
+                  <DemoBackButton tintColor={tintColor} onPress={onBackToCatalog} />
+                )
+              : undefined,
+            headerRight: sourceHeaderRight(
+              'features/react-native-enriched-markdown/source/official/App.tsx',
+              'App.tsx source'
+            ),
+          }}
         />
         <Stack.Screen
           name="Playground"
           component={PlaygroundScreen}
-          options={{ title: 'Playground' }}
+          options={{
+            title: 'Playground',
+            headerRight: sourceHeaderRight(
+              'features/react-native-enriched-markdown/source/official/screens/playground/PlaygroundScreen.tsx',
+              'PlaygroundScreen.tsx source'
+            ),
+          }}
         />
         <Stack.Screen
           name="Text"
           component={TextScreen}
-          options={{ title: 'Text' }}
+          options={{
+            title: 'Text',
+            headerRight: sourceHeaderRight(
+              'features/react-native-enriched-markdown/source/official/screens/text/TextScreen.tsx',
+              'TextScreen.tsx source'
+            ),
+          }}
         />
         <Stack.Screen
           name="Input"
@@ -46,12 +86,13 @@ export default function App() {
         <Stack.Screen
           name="Stream"
           component={StreamingMarkdownSimulator}
-          options={{ title: 'Stream' }}
-        />
-        <Stack.Screen
-          name="Storybook"
-          component={StorybookScreen}
-          options={{ title: 'Storybook' }}
+          options={{
+            title: 'Stream',
+            headerRight: sourceHeaderRight(
+              'features/react-native-enriched-markdown/source/official/screens/streaming/StreamingMarkdownSimulator.tsx',
+              'StreamingMarkdownSimulator.tsx source'
+            ),
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>

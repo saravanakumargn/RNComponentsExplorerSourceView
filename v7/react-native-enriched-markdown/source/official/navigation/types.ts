@@ -6,7 +6,6 @@ export type RootStackParamList = {
   Text: undefined;
   Input: { channel: string };
   Stream: undefined;
-  Storybook: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =

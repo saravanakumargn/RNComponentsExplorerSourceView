@@ -12,12 +12,14 @@ import {
   type StyleState,
 } from 'react-native-enriched-markdown';
 import { LinkModal } from './LinkModal';
-import BoldIcon from '../assets/icons/format_bold_24dp.svg';
-import ItalicIcon from '../assets/icons/format_italic_24dp.svg';
-import UnderlineIcon from '../assets/icons/format_underlined_24dp.svg';
-import StrikethroughIcon from '../assets/icons/strikethrough_s_24dp.svg';
-import SpoilerIcon from '../assets/icons/visibility_off_24dp.svg';
-import AddLinkIcon from '../assets/icons/add_link_24dp.svg';
+import {
+  BoldIcon,
+  ItalicIcon,
+  UnderlineIcon,
+  StrikethroughIcon,
+  SpoilerIcon,
+  AddLinkIcon,
+} from './icons';
 
 interface FormattingToolbarProps {
   state: StyleState | null;
