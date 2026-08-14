@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { ScrollView, Text, StyleSheet } from 'react-native';
 import { HomeScreenButton } from './HomeScreenButton';
+import { useBottomContentPadding } from '@/components/screen-layout';
 import type {
   RootStackParamList,
   RootStackScreenProps,
@@ -47,8 +48,17 @@ const SCREENS: ScreenItem[] = [
 ];
 
 export default function HomeScreen({ navigation }: Props) {
+  // The four blocks plus the heading overflow a small phone once the
+  // Explorer's header, tab bar and banner ad are accounted for. flexGrow keeps
+  // them vertically centred when there is room and lets them scroll when not.
+  const bottomPadding = useBottomContentPadding(20);
+
   return (
-    <View style={styles.container} testID="home-screen">
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[styles.content, { paddingBottom: bottomPadding }]}
+      testID="home-screen"
+    >
       <Text style={styles.title}>Enriched Markdown Examples</Text>
       <Text style={styles.subtitle}>
         Explore different markdown rendering and input capabilities
@@ -68,17 +78,20 @@ export default function HomeScreen({ navigation }: Props) {
           }
         />
       ))}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  content: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f5f5f5',
   },
   title: {
     fontSize: 28,
