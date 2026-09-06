@@ -1,3 +1,12 @@
+// This module binds the name `Symbol`, which shadows the JavaScript global of
+// the same name. The React Compiler emits `Symbol.for("react.memo_cache_sentinel")`
+// for its memo cache and assumes that identifier is the global, so in a compiled
+// build the generated code calls `.for()` on this module's component instead and
+// throws `undefined is not a function` — crashing the screen on open. `use no
+// memo` is the compiler's documented opt-out (registered by babel-preset-expo)
+// and is the smallest change that keeps upstream's naming intact.
+"use no memo";
+
 import * as Svg from 'react-native-svg';
 
 import Example from './Example';
