@@ -30,11 +30,15 @@ code, and Copy / Share / Download actions.
 
 ## How it works
 
-- `scripts/source-viewer/generate-source-registry.mjs` reads each manifest
-  file's real, current content from disk and bakes it into the committed
-  `generated/source-registry.ts` — the same "commit the generated output"
-  convention `scripts/maestro/generate-smoke-flows.mjs` already uses. No
-  runtime file reads, no Metro asset-loader tricks.
+- `scripts/source-viewer/generate-source-registry.mjs` validates that each
+  manifest path exists and bakes only file metadata into the committed
+  `generated/source-registry.ts`.
+- `source-fetcher.ts` maps the app's repo-relative paths to the matching files
+  in `RNComponentsExplorerSourceView/master/v7` and fetches the active file
+  from GitHub on demand. The fetched content is cached in memory for the
+  current app session and cancelled when the viewer closes or changes files.
+- The source viewer shows loading and retry states when GitHub is unavailable;
+  source content is not bundled into the app.
 - `syntax-highlight-html.ts` reuses the project's existing `highlight.js` +
   `LEARNING_HIGHLIGHT_CSS` (already used for Learning content) to render
   highlighted HTML inside a `WebView`.

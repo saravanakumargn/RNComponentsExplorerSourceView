@@ -74,27 +74,6 @@ const ComponentTab = ({
   />
 );
 
-const PlaygroundTab = ({
-  isComponentActive,
-  handleNavBarPress,
-  theme,
-}: Readonly<{
-  handleNavBarPress: NavBarOnPressHandler,
-  isComponentActive: boolean,
-  theme: RNTesterTheme,
-}>) => (
-  <NavbarButton
-    testID="playground-tab"
-    label="Playground"
-    handlePress={() => handleNavBarPress({screen: 'playgrounds'})}
-    activeImage={theme.NavBarPlaygroundActiveIcon}
-    inactiveImage={theme.NavBarPlaygroundInactiveIcon}
-    isActive={isComponentActive}
-    theme={theme}
-    iconStyle={styles.componentIcon}
-  />
-);
-
 const APITab = ({
   isAPIActive,
   handleNavBarPress,
@@ -131,18 +110,12 @@ const RNTesterNavbar = ({
 
   const isAPIActive = screen === 'apis' && !isExamplePageOpen;
   const isComponentActive = screen === 'components' && !isExamplePageOpen;
-  const isPlaygroundActive = screen === 'playgrounds';
 
   return (
     <View>
       <View style={styles.buttonContainer}>
         <ComponentTab
           isComponentActive={isComponentActive}
-          handleNavBarPress={handleNavBarPress}
-          theme={theme}
-        />
-        <PlaygroundTab
-          isComponentActive={isPlaygroundActive}
           handleNavBarPress={handleNavBarPress}
           theme={theme}
         />

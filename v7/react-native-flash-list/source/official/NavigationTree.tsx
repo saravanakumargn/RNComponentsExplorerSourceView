@@ -1,10 +1,12 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { HeaderBackButton } from "@react-navigation/elements";
 
 // Host integration: lets the root screen exit back to the surrounding catalog
 // and open the shared source viewer. Neither is part of the upstream fixture app.
+import { DemoBackButton } from "../../../../components/demo-back-button";
+import { createDemoScreenLayout } from "../../../../components/demo-screen-layout";
+import { nestedDemoInitialState } from "../../../../components/nested-demo-deep-link";
 import { goBackToCatalog } from "../../catalog-navigation-bridge";
 import { ViewSourceButton } from "../../../source-viewer/view-source-button";
 
@@ -13,7 +15,7 @@ import List from "./List";
 import PaginatedList from "./PaginatedList";
 import ContactsSectionList from "./contacts/ContactsSectionList";
 import Contacts from "./contacts/Contacts";
-import { RootStackParamList } from "./constants";
+import { ROUTE_NAMES, RootStackParamList } from "./constants";
 import { ExamplesScreen } from "./ExamplesScreen";
 import { DebugScreen } from "./Debug";
 import { Masonry } from "./Masonry";
@@ -32,20 +34,31 @@ import ShowcaseApp from "./ShowcaseApp";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
-const NavigationTree = () => {
+// Host integration: a readiness testID per screen, and `?demo=<route>` support so
+// the route smoke suite can open one example directly.
+const screenLayout = createDemoScreenLayout("flash-list");
+const routeNames = ROUTE_NAMES;
+
+const NavigationTree = ({ initialDemo }: { initialDemo?: string }) => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ animation: "none" }}>
+    <NavigationContainer
+      initialState={nestedDemoInitialState("Examples", initialDemo, routeNames)}
+    >
+      <Stack.Navigator
+        screenLayout={screenLayout}
+        screenOptions={{ animation: "none", headerBackButtonDisplayMode: "minimal" }}
+      >
         <Stack.Group>
           <Stack.Screen
             name="Examples"
             component={ExamplesScreen}
             options={{
-              headerLeft: () => <HeaderBackButton onPress={goBackToCatalog} />,
+              headerLeft: () => <DemoBackButton onPress={goBackToCatalog} />,
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/ExamplesScreen.tsx"
                   onlyInitialPath
                 />
@@ -59,7 +72,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/List.tsx"
                   onlyInitialPath
                 />
@@ -73,7 +87,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/Grid.tsx"
                   onlyInitialPath
                 />
@@ -88,7 +103,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/DynamicColumnSpan.tsx"
                   onlyInitialPath
                 />
@@ -102,7 +118,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/SectionList.tsx"
                   onlyInitialPath
                 />
@@ -116,7 +133,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/PaginatedList.tsx"
                   onlyInitialPath
                 />
@@ -130,7 +148,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/Reminders.tsx"
                   onlyInitialPath
                 />
@@ -144,7 +163,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/contacts/Contacts.tsx"
                   onlyInitialPath
                 />
@@ -159,7 +179,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/contacts/ContactsSectionList.tsx"
                   onlyInitialPath
                 />
@@ -173,7 +194,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/DynamicItems.tsx"
                   onlyInitialPath
                 />
@@ -187,7 +209,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/Chat.tsx"
                   onlyInitialPath
                 />
@@ -202,7 +225,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/HeaderFooterExample.tsx"
                   onlyInitialPath
                 />
@@ -217,7 +241,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/RecyclerViewHandlerTest.tsx"
                   onlyInitialPath
                 />
@@ -232,7 +257,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/MovieList.tsx"
                   onlyInitialPath
                 />
@@ -247,7 +273,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/Carousel.tsx"
                   onlyInitialPath
                 />
@@ -262,7 +289,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/LayoutOptions.tsx"
                   onlyInitialPath
                 />
@@ -277,7 +305,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/ShowcaseApp.tsx"
                   onlyInitialPath
                 />
@@ -292,7 +321,8 @@ const NavigationTree = () => {
             headerRight: () => (
               <ViewSourceButton
                 demoId="flash-list"
-                title="Source"
+                iconOnly
+                title="FlashList source"
                 initialPath="features/react-native-flash-list/source/official/Masonry.tsx"
                 onlyInitialPath
               />
@@ -306,7 +336,8 @@ const NavigationTree = () => {
             headerRight: () => (
               <ViewSourceButton
                 demoId="flash-list"
-                title="Source"
+                iconOnly
+                title="FlashList source"
                 initialPath="features/react-native-flash-list/source/official/HorizontalList.tsx"
                 onlyInitialPath
               />
@@ -321,7 +352,8 @@ const NavigationTree = () => {
               headerRight: () => (
                 <ViewSourceButton
                   demoId="flash-list"
-                  title="Source"
+                  iconOnly
+                  title="FlashList source"
                   initialPath="features/react-native-flash-list/source/official/Debug/DebugScreen.tsx"
                   onlyInitialPath
                 />

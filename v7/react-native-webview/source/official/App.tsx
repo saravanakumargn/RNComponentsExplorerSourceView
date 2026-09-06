@@ -167,7 +167,12 @@ const TESTS = {
   },
 };
 
-interface Props {}
+// Host integration: `?demo=<test>` opens one test directly. This example picks a
+// test with local state rather than a navigator, so the deep link seeds that
+// state; an unknown name falls back to the default, as it does elsewhere.
+interface Props {
+  initialDemo?: string;
+}
 interface State {
   restarting: boolean;
   currentTest: Object;
@@ -176,7 +181,7 @@ interface State {
 export default class App extends Component<Props, State> {
   state = {
     restarting: false,
-    currentTest: TESTS.Alerts,
+    currentTest: TESTS[this.props.initialDemo as keyof typeof TESTS] ?? TESTS.Alerts,
   };
 
   _simulateRestart = () => {
@@ -192,7 +197,10 @@ export default class App extends Component<Props, State> {
   render() {
     const { restarting, currentTest } = this.state;
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView
+        style={styles.container}
+        testID={`maestro-demo-react-native-webview-${currentTest.testId}-ready`}
+      >
         <TouchableOpacity
           style={styles.closeKeyboardView}
           onPress={() => Keyboard.dismiss()}

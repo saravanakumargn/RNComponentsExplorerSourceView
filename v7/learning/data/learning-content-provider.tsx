@@ -3,8 +3,8 @@ import type { PropsWithChildren } from 'react';
 
 import { createLearningContentRepository, type LearningContentRepository } from './learning-content-repository';
 
-export const LEARNING_CONTENT_SCHEMA_VERSION = 1;
-export const LEARNING_CONTENT_VERSION = '1.0.0';
+export const LEARNING_CONTENT_SCHEMA_VERSION = 3;
+export const LEARNING_CONTENT_VERSION = '2.0.0';
 
 type MetadataRepository = Pick<LearningContentRepository, 'getMetadata'>;
 
@@ -25,7 +25,7 @@ export async function assertLearningContentMetadata(
 /**
  * The content DB is immutable. Overwriting the copied asset at startup ensures
  * an app release with a new bundled version cannot leave stale content behind;
- * user progress is isolated in learning-progress.db and is unaffected.
+ * user progress is isolated in learning-progress-v2.db and is unaffected.
  */
 export function LearningContentProvider({ children }: PropsWithChildren) {
   return (

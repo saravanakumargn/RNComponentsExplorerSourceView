@@ -5,10 +5,11 @@ import { useRouter } from 'expo-router';
 // RNTester is official Flow source, which Metro compiles at runtime. Metro
 // resolves its platform-safe registry in the config below.
 const RNTesterApp = require('./source/RNTesterAppShared').default as ComponentType<{
+  initialDemo?: string;
   onExit: () => void;
 }>;
 
-export function RNTesterDemoScreen() {
+export function RNTesterDemoScreen({ initialDemo }: { initialDemo?: string }) {
   const router = useRouter();
   const handleExit = useCallback(() => {
     if (router.canGoBack()) {
@@ -20,6 +21,6 @@ export function RNTesterDemoScreen() {
   }, [router]);
 
   return (
-    <RNTesterApp onExit={handleExit} />
+    <RNTesterApp initialDemo={initialDemo} onExit={handleExit} />
   );
 }

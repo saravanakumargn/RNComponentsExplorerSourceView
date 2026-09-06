@@ -297,11 +297,6 @@ const APIs: Array<RNTesterModuleInfo> = (
       module: require('../examples/PointerEvents/PointerEventsExample'),
     },
     {
-      key: 'RTLExample',
-      category: 'Basic',
-      module: require('../examples/RTL/RTLExample'),
-    },
-    {
       key: 'ShareExample',
       category: 'Basic',
       module: require('../examples/Share/ShareExample'),
@@ -401,16 +396,9 @@ const APIs: Array<RNTesterModuleInfo> = (
   ] as Array<?RNTesterModuleInfo>
 ).filter(Boolean);
 
-const Playgrounds: Array<RNTesterModuleInfo> = [
-  {
-    key: 'PlaygroundExample',
-    module: require('../examples/Playground/PlaygroundExample'),
-  },
-];
-
 const Modules: {[key: string]: RNTesterModule} = {};
 
-[...APIs, ...Components, ...Playgrounds].forEach(Example => {
+[...APIs, ...Components].forEach(Example => {
   Modules[Example.key] = Example.module;
 });
 

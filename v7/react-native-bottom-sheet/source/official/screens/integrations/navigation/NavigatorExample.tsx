@@ -64,7 +64,7 @@ const Navigator = () => {
 
   const options = useMemo<ComponentProps<typeof Stack.Screen>['options']>(
     () => ({
-      headerBackTitle: 'Back',
+      headerBackButtonDisplayMode: 'minimal',
     }),
     []
   );

@@ -3,7 +3,7 @@
 
 declare module 'uniwind' {
     export interface UniwindConfig {
-        themes: readonly ['light', 'dark', 'lavender-light', 'lavender-dark', 'mint-light', 'mint-dark', 'sky-light', 'sky-dark']
+        themes: readonly ['light', 'dark', 'lavender-light', 'lavender-dark', 'mint-light', 'mint-dark', 'sky-light', 'sky-dark', 'gluestack-light', 'gluestack-dark', 'nativewindui-light', 'nativewindui-dark', 'nativewindui-android-light', 'nativewindui-android-dark']
     }
 }
 

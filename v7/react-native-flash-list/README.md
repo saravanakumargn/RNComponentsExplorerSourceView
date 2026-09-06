@@ -32,7 +32,11 @@ and ShowcaseApp — is vendored as-is.
   changed).
 - `NavigationTree.tsx`: drops the excluded screens' imports/registrations, and
   adds `headerLeft`/`headerRight` on the root `Examples` screen so it can exit
-  back to the catalog and open the shared source viewer (see below).
+  back to the catalog and open the shared source viewer (see below). It also
+  takes an `initialDemo` prop and a `screenLayout`, so the route smoke suite can
+  open one screen directly and assert it mounted — see `e2e/smoke/README.md`.
+- `constants.ts` additionally exports `ROUTE_NAMES`, the same route names as a
+  value, so the navigator can reject an unknown `?demo=` link.
 
 ## Local integration only
 

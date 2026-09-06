@@ -15,7 +15,12 @@ function sourceHeaderRight(libraryId: string, title: string) {
 }
 
 export function LibraryDetailScreen() {
-  const { library } = useLocalSearchParams<{ library: string }>();
+  // `demo` deep-links straight to one screen inside a library's own nested
+  // navigator, which otherwise has no URL of its own. The smoke suite uses it to
+  // open all ~1,000 demos one per isolated flow instead of tapping through each
+  // library's list; hosts that support it seed a root -> demo back stack, so a
+  // link opened by hand still has somewhere to go back to.
+  const { library, demo } = useLocalSearchParams<{ library: string; demo?: string }>();
   const router = useRouter();
   const selectedLibrary = getLibrary(library);
   const goBackToCatalog = useCallback(() => {
@@ -43,7 +48,7 @@ export function LibraryDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-react-native-ready">
-          <RNTesterDemoScreen />
+          <RNTesterDemoScreen initialDemo={demo} />
         </View>
       </>
     );
@@ -55,7 +60,7 @@ export function LibraryDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-expo-components-ready">
-          <NativeComponentListEntry onBackToCatalog={goBackToCatalog} />
+          <NativeComponentListEntry initialDemo={demo} onBackToCatalog={goBackToCatalog} />
         </View>
       </>
     );
@@ -72,7 +77,7 @@ export function LibraryDetailScreen() {
           }}
         />
         <View style={{ flex: 1 }} testID="maestro-library-tamagui-ready">
-          <TamaguiDemoScreen />
+          <TamaguiDemoScreen initialDemo={demo} />
         </View>
       </>
     );
@@ -84,7 +89,7 @@ export function LibraryDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-react-native-skia-ready">
-          <SkiaDemoScreen />
+          <SkiaDemoScreen initialDemo={demo} />
         </View>
       </>
     );
@@ -112,7 +117,7 @@ export function LibraryDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-react-native-reanimated-ready">
-          <ReanimatedDemoScreen />
+          <ReanimatedDemoScreen initialDemo={demo} />
         </View>
       </>
     );
@@ -122,14 +127,9 @@ export function LibraryDetailScreen() {
     const { ReactNativeEnrichedMarkdownDemoHost } = require('@/features/react-native-enriched-markdown/react-native-enriched-markdown-demo-host');
     return (
       <>
-        <Stack.Screen
-          options={{
-            title: selectedLibrary.title,
-            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
-          }}
-        />
+        <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-react-native-enriched-markdown-ready">
-          <ReactNativeEnrichedMarkdownDemoHost />
+          <ReactNativeEnrichedMarkdownDemoHost onBackToCatalog={goBackToCatalog} />
         </View>
       </>
     );
@@ -175,7 +175,7 @@ export function LibraryDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-react-native-vision-camera-ready">
-          <ReactNativeVisionCameraDemoHost />
+          <ReactNativeVisionCameraDemoHost onBackToCatalog={goBackToCatalog} />
         </View>
       </>
     );
@@ -204,7 +204,7 @@ export function LibraryDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-heroui-native-ready">
-          <HeroUINativeDemoScreen onBackToCatalog={goBackToCatalog} />
+          <HeroUINativeDemoScreen initialDemo={demo} onBackToCatalog={goBackToCatalog} />
         </View>
       </>
     );
@@ -216,19 +216,19 @@ export function LibraryDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-gluestack-ui-ready">
-          <GluestackDemoHost onBackToCatalog={goBackToCatalog} />
+          <GluestackDemoHost initialDemo={demo} onBackToCatalog={goBackToCatalog} />
         </View>
       </>
     );
   }
 
-  if (selectedLibrary.id === 'react-native-reusables') {
-    const { ReactNativeReusablesDemoHost } = require('@/features/react-native-reusables/react-native-reusables-demo-host');
+  if (selectedLibrary.id === 'nativewind-ui') {
+    const { NativeWindUIDemoHost } = require('@/features/nativewind-ui/nativewind-ui-demo-host');
     return (
       <>
         <Stack.Screen options={{ headerShown: false }} />
-        <View style={{ flex: 1 }} testID="maestro-library-react-native-reusables-ready">
-          <ReactNativeReusablesDemoHost onBackToCatalog={goBackToCatalog} />
+        <View style={{ flex: 1 }} testID="maestro-library-nativewind-ui-ready">
+          <NativeWindUIDemoHost initialDemo={demo} onBackToCatalog={goBackToCatalog} />
         </View>
       </>
     );
@@ -241,7 +241,6 @@ export function LibraryDetailScreen() {
         <Stack.Screen
           options={{
             title: selectedLibrary.title,
-            headerBackButtonDisplayMode: 'minimal',
             headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
           }}
         />
@@ -269,6 +268,345 @@ export function LibraryDetailScreen() {
     );
   }
 
+  if (selectedLibrary.id === 'tinybase') {
+    const { TinyBaseDemoHost } = require('@/features/tinybase/tinybase-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-tinybase-ready">
+          <TinyBaseDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'tanstack-query') {
+    const { TanStackQueryDemoHost } = require('@/features/tanstack-query/tanstack-query-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-tanstack-query-ready">
+          <TanStackQueryDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'rive') {
+    const { RiveDemoHost } = require('@/features/rive/rive-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-rive-ready">
+          <RiveDemoHost initialDemo={demo} />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'expo-haptics') {
+    const { ExpoHapticsDemoHost } = require('@/features/expo-haptics/expo-haptics-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-expo-haptics-ready">
+          <ExpoHapticsDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'react-native-haptic-feedback') {
+    const {
+      ReactNativeHapticFeedbackDemoHost,
+    } = require('@/features/react-native-haptic-feedback/react-native-haptic-feedback-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-react-native-haptic-feedback-ready">
+          <ReactNativeHapticFeedbackDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'lucide-react-native') {
+    const { LucideDemoHost } = require('@/features/lucide/lucide-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-lucide-react-native-ready">
+          <LucideDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'zustand') {
+    const { ZustandDemoHost } = require('@/features/zustand/zustand-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-zustand-ready">
+          <ZustandDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'legend-state') {
+    const { LegendStateDemoHost } = require('@/features/legend-state/legend-state-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-legend-state-ready">
+          <LegendStateDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'elevenlabs') {
+    const { ElevenLabsDemoHost } = require('@/features/elevenlabs/elevenlabs-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-elevenlabs-ready">
+          <ElevenLabsDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'clerk') {
+    const { ClerkDemoHost } = require('@/features/clerk/clerk-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-clerk-ready">
+          <ClerkDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  // Documented-but-not-run entries share one screen, keyed off status rather
+  // than id, so adding another (LogRocket, BugSnag, Vexo) needs no branch here.
+  if (selectedLibrary.status === 'reference') {
+    const { LibraryReferenceScreen } = require('@/features/reference/library-reference-screen');
+    return (
+      <>
+        <Stack.Screen options={{ title: selectedLibrary.title }} />
+        <View style={{ flex: 1 }} testID={`maestro-library-${selectedLibrary.id}-ready`}>
+          <LibraryReferenceScreen library={selectedLibrary} />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'react-native-pulsar') {
+    const { ReactNativePulsarDemoHost } = require('@/features/react-native-pulsar/react-native-pulsar-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-react-native-pulsar-ready">
+          <ReactNativePulsarDemoHost initialDemo={demo} />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'expo-notifications') {
+    const { ExpoNotificationsDemoHost } = require('@/features/expo-notifications/expo-notifications-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-expo-notifications-ready">
+          <ExpoNotificationsDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'expo-glass-effect') {
+    const { ExpoGlassEffectDemoHost } = require('@/features/expo-glass-effect/expo-glass-effect-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-expo-glass-effect-ready">
+          <ExpoGlassEffectDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'expo-mesh-gradient') {
+    const { ExpoMeshGradientDemoHost } = require('@/features/expo-mesh-gradient/expo-mesh-gradient-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-expo-mesh-gradient-ready">
+          <ExpoMeshGradientDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'expo-live-photo') {
+    const { ExpoLivePhotoDemoHost } = require('@/features/expo-live-photo/expo-live-photo-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-expo-live-photo-ready">
+          <ExpoLivePhotoDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'react-native-webview') {
+    const { ReactNativeWebViewDemoHost } = require('@/features/react-native-webview/react-native-webview-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-react-native-webview-ready">
+          <ReactNativeWebViewDemoHost initialDemo={demo} />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'react-native-mmkv') {
+    const { ReactNativeMmkvDemoHost } = require('@/features/react-native-mmkv/react-native-mmkv-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-react-native-mmkv-ready">
+          <ReactNativeMmkvDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'expo-sqlite') {
+    const { ExpoSqliteDemoHost } = require('@/features/expo-sqlite/expo-sqlite-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-expo-sqlite-ready">
+          <ExpoSqliteDemoHost />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'react-native-purchases') {
+    const { ReactNativePurchasesDemoHost } = require('@/features/react-native-purchases/react-native-purchases-demo-host');
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: selectedLibrary.title,
+            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+          }}
+        />
+        <View style={{ flex: 1 }} testID="maestro-library-react-native-purchases-ready">
+          <ReactNativePurchasesDemoHost />
+        </View>
+      </>
+    );
+  }
+
   if (selectedLibrary.id === 'react-native-gesture-handler') {
     const { ReactNativeGestureHandlerDemoHost } = require('@/features/react-native-gesture-handler/react-native-gesture-handler-demo-host');
     return (
@@ -276,7 +614,6 @@ export function LibraryDetailScreen() {
         <Stack.Screen
           options={{
             title: selectedLibrary.title,
-            headerBackButtonDisplayMode: 'minimal',
             headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
           }}
         />
@@ -310,7 +647,7 @@ export function LibraryDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-react-native-calendars-ready">
-          <ReactNativeCalendarsDemoHost onBackToCatalog={goBackToCatalog} />
+          <ReactNativeCalendarsDemoHost initialDemo={demo} onBackToCatalog={goBackToCatalog} />
         </View>
       </>
     );
@@ -322,7 +659,7 @@ export function LibraryDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-react-native-elements-ready">
-          <ReactNativeElementsDemoHost onBackToCatalog={goBackToCatalog} />
+          <ReactNativeElementsDemoHost initialDemo={demo} onBackToCatalog={goBackToCatalog} />
         </View>
       </>
     );
@@ -334,7 +671,7 @@ export function LibraryDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-flash-list-ready">
-          <ReactNativeFlashListDemoHost onBackToCatalog={goBackToCatalog} />
+          <ReactNativeFlashListDemoHost initialDemo={demo} onBackToCatalog={goBackToCatalog} />
         </View>
       </>
     );
@@ -346,7 +683,7 @@ export function LibraryDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-legend-list-ready">
-          <LegendListDemoHost onBackToCatalog={goBackToCatalog} />
+          <LegendListDemoHost initialDemo={demo} onBackToCatalog={goBackToCatalog} />
         </View>
       </>
     );
@@ -358,7 +695,7 @@ export function LibraryDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-react-hook-form-ready">
-          <ReactHookFormDemoHost onBackToCatalog={goBackToCatalog} />
+          <ReactHookFormDemoHost initialDemo={demo} onBackToCatalog={goBackToCatalog} />
         </View>
       </>
     );
@@ -370,7 +707,7 @@ export function LibraryDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-formik-ready">
-          <FormikDemoHost onBackToCatalog={goBackToCatalog} />
+          <FormikDemoHost initialDemo={demo} onBackToCatalog={goBackToCatalog} />
         </View>
       </>
     );
@@ -400,8 +737,14 @@ export function LibraryDetailScreen() {
         <Stack.Screen
           options={{
             title: selectedLibrary.title,
-            headerBackButtonDisplayMode: 'minimal',
-            headerRight: sourceHeaderRight(selectedLibrary.id, selectedLibrary.title),
+            headerRight: () => (
+              <ViewSourceButton
+                demoId={selectedLibrary.id}
+                iconOnly
+                initialPath="features/react-native-gifted-charts/source/official/examples/index.tsx"
+                title={`${selectedLibrary.title} source`}
+              />
+            ),
           }}
         />
         <View style={{ flex: 1 }} testID="maestro-library-react-native-gifted-charts-ready">
@@ -469,6 +812,18 @@ export function LibraryDetailScreen() {
         <Stack.Screen options={{ headerShown: false }} />
         <View style={{ flex: 1 }} testID="maestro-library-react-native-ui-lib-ready">
           <ReactNativeUiLibDemoHost onBackToCatalog={goBackToCatalog} />
+        </View>
+      </>
+    );
+  }
+
+  if (selectedLibrary.id === 'react-native-ai') {
+    const { ReactNativeAiDemoHost } = require('@/features/react-native-ai/react-native-ai-demo-host');
+    return (
+      <>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={{ flex: 1 }} testID="maestro-library-react-native-ai-ready">
+          <ReactNativeAiDemoHost initialDemo={demo} onBackToCatalog={goBackToCatalog} />
         </View>
       </>
     );

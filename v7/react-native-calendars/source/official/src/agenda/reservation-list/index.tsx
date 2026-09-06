@@ -107,14 +107,30 @@ class ReservationList extends Component<ReservationListProps, State> {
   }
 
   componentDidUpdate(prevProps: ReservationListProps) {
-    if (this.props.topDay && prevProps.topDay && prevProps !== this.props) {
-      if (!sameDate(prevProps.topDay, this.props.topDay)) {
-        this.setState({reservations: []},
-          () => this.updateReservations(this.props)
-        );
-      } else {
-        this.updateReservations(this.props);
-      }
+    if (!this.props.topDay || !prevProps.topDay) {
+      return;
+    }
+
+    const topDayChanged = !sameDate(prevProps.topDay, this.props.topDay);
+    const selectedDayChanged = !sameDate(prevProps.selectedDay, this.props.selectedDay);
+    const itemsChanged = prevProps.items !== this.props.items;
+
+    // `prevProps !== this.props` used to gate this block, but React hands a new props
+    // object on every parent render regardless of whether any value actually changed,
+    // so that check was always true. That caused every parent re-render to call
+    // updateReservations() -> setState(), re-triggering this same lifecycle and
+    // crashing with "Maximum update depth exceeded". Compare the values that matter
+    // instead, so this only runs when something actually changed.
+    if (!topDayChanged && !selectedDayChanged && !itemsChanged) {
+      return;
+    }
+
+    if (topDayChanged) {
+      this.setState({reservations: []},
+        () => this.updateReservations(this.props)
+      );
+    } else {
+      this.updateReservations(this.props);
     }
   }
 

@@ -1,8 +1,10 @@
 import { useMemo, useState, type ComponentType } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { IconButton, Text, useTheme } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { DemoBackButton } from '@/components/demo-back-button';
+import { useBottomContentPadding } from '@/components/screen-layout';
 import { ViewSourceButton } from '@/features/source-viewer/view-source-button';
 
 import { CURATED_EXAMPLES, CURATED_GROUP_ORDER } from './source/official/examples-shared/catalog';
@@ -45,6 +47,7 @@ const exampleSourcePaths: Partial<Record<string, string>> = {
 };
 
 type LegendListDemoHostProps = {
+  initialDemo?: string;
   onBackToCatalog: () => void;
 };
 
@@ -66,13 +69,14 @@ function DemoHeader({
         { backgroundColor: theme.colors.background, borderBottomColor: theme.colors.outlineVariant },
       ]}
     >
-      <IconButton icon="chevron-left" accessibilityLabel="Back" onPress={onBack} />
+      <DemoBackButton onPress={onBack} />
       <Text variant="titleMedium" style={styles.headerTitle} numberOfLines={1}>
         {title}
       </Text>
       <ViewSourceButton
         demoId="legend-list"
-        title="Source"
+        iconOnly
+        title="LegendList source"
         initialPath={sourcePath}
         onlyInitialPath={sourcePath !== undefined}
       />
@@ -80,9 +84,13 @@ function DemoHeader({
   );
 }
 
-export function LegendListDemoHost({ onBackToCatalog }: LegendListDemoHostProps) {
+export function LegendListDemoHost({ initialDemo, onBackToCatalog }: LegendListDemoHostProps) {
   const theme = useTheme();
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const bottomPadding = useBottomContentPadding(16);
+  // `?demo=` names an example slug; an unknown one opens the list, as elsewhere.
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(
+    () => CURATED_EXAMPLES.find((example) => example.slug === initialDemo)?.slug ?? null,
+  );
   const groups = useMemo(() => {
     return CURATED_GROUP_ORDER.map((group) => ({
       group,
@@ -95,7 +103,9 @@ export function LegendListDemoHost({ onBackToCatalog }: LegendListDemoHostProps)
     const ExampleComponent = exampleComponents[selectedSlug];
 
     return (
-      <View style={{ flex: 1 }}>
+      // The list is unmounted while a demo is open, so this wrapper is what tells
+      // the smoke suite which demo actually mounted.
+      <View style={{ flex: 1 }} testID={`maestro-demo-legend-list-${selectedSlug}-ready`}>
         <SafeAreaView edges={['top']} style={{ backgroundColor: theme.colors.background }}>
           <DemoHeader
             title={meta?.title ?? selectedSlug}
@@ -115,7 +125,7 @@ export function LegendListDemoHost({ onBackToCatalog }: LegendListDemoHostProps)
       </SafeAreaView>
       <ScrollView
         style={{ backgroundColor: theme.colors.background }}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: bottomPadding }]}
       >
         {groups.map(({ group, examples }) => (
           <View key={group} style={styles.group}>
@@ -148,6 +158,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: 'row',
     gap: 4,
+    minHeight: 48,
     paddingRight: 12,
   },
   headerTitle: {

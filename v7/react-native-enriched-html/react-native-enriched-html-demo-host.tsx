@@ -1,9 +1,15 @@
+import { useFonts } from 'expo-font';
 import { type ComponentType } from 'react';
 
-const OfficialEnrichedTextScreen = require('./source/official/screens/EnrichedTextScreen')
-  .EnrichedTextScreen as ComponentType<{ onSwitch: () => void }>;
+const OfficialApp = require('./source/official/App').default as ComponentType;
 
-/** Hosts the official React Native Enriched HTML v1.0.1 display example. */
+/** Hosts the official React Native Enriched HTML v1.0.1 example app. */
 export function ReactNativeEnrichedHtmlDemoHost() {
-  return <OfficialEnrichedTextScreen onSwitch={() => undefined} />;
+  const [fontsLoaded] = useFonts({
+    FontAwesome: require('@react-native-vector-icons/fontawesome/fonts/FontAwesome.ttf'),
+  });
+
+  if (!fontsLoaded) return null;
+
+  return <OfficialApp />;
 }

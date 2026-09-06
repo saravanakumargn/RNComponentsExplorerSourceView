@@ -46,8 +46,8 @@ lightweight catalog + detail screen (see below), not a second embedded router.
   every other complex vendored demo.
 - `metro.config.js` redirects the bare `@legendapp/list` import to
   `@legendapp/list/react-native` (its 3.x has no root export — only platform
-  subpaths) so the three *other* demos that already imported the pre-3.x root
-  path (`react-native-actions-sheet`, `react-native-bottom-sheet`, `gluestack`)
+  subpaths) so the two *other* demos that already imported the pre-3.x root
+  path (`react-native-actions-sheet`, `react-native-bottom-sheet`)
   keep working unmodified after the version bump.
 - The demo host passes each screen's own file path as `ViewSourceButton`'s
   `initialPath` for the 5 slugs listed in `scripts/source-viewer/manifest.mjs`

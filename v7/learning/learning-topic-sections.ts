@@ -46,5 +46,5 @@ export function getLessonAccessibilityLabel({
 }): string {
   const description = lesson.subtopicDescription ? ` ${lesson.subtopicDescription}.` : '';
   const completion = lesson.completed ? ' Completed.' : ' Not completed.';
-  return `${lesson.subtopicName}.${description}${completion} ${unlocked ? 'Available. Opens lesson.' : 'Locked. Opens subscription options.'}`;
+  return `${lesson.subtopicName}.${description}${completion} ${unlocked ? 'Available. Opens lesson.' : 'Locked. Opens unlock options.'}`;
 }

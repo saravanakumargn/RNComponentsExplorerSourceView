@@ -16,7 +16,6 @@ import RNTesterNavBar, {navBarHeight} from './components/RNTesterNavbar';
 import {RNTesterThemeContext, themes} from './components/RNTesterTheme';
 import RNTTitleBar from './components/RNTTitleBar';
 import {ViewSourceButton} from '../../source-viewer/view-source-button';
-import {title as PlaygroundTitle} from './examples/Playground/PlaygroundExample';
 import moduleSourcePaths from './module-source-paths.json';
 import RNTesterList from './utils/RNTesterList';
 import {
@@ -26,7 +25,7 @@ import {
 import {
   Screens,
   getExamplesListWithRecentlyUsed,
-  initialNavigationState,
+  getInitialNavigationState,
 } from './utils/testerStateUtils';
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useReducer} from 'react';
@@ -49,6 +48,7 @@ type ExitHandler = () => void;
 const RNTesterApp = ({
   testList,
   customBackButton,
+  initialDemo,
   onExit,
 }: {
   testList?: {
@@ -56,11 +56,15 @@ const RNTesterApp = ({
     apis?: Array<RNTesterModuleInfo>,
   },
   customBackButton?: BackButton,
+  // Host integration: `?demo=<module key>` opens one example directly, for the
+  // route smoke suite. RNTester navigates by reducer state rather than by route,
+  // so the deep link seeds that state instead of a navigator.
+  initialDemo?: ?string,
   onExit?: ExitHandler,
 }): React.Node => {
   const [state, dispatch] = useReducer(
     RNTesterNavigationReducer,
-    initialNavigationState,
+    getInitialNavigationState(initialDemo),
   );
   const colorScheme = useColorScheme();
 
@@ -125,21 +129,10 @@ const RNTesterApp = ({
 
   const handleNavBarPress = useCallback(
     (args: {screen: ScreenTypes}) => {
-      if (args.screen === 'playgrounds') {
-        dispatch({
-          type: RNTesterNavigationActionsType.NAVBAR_OPEN_MODULE_PRESS,
-          data: {
-            key: 'PlaygroundExample',
-            title: PlaygroundTitle,
-            screen: args.screen,
-          },
-        });
-      } else {
-        dispatch({
-          type: RNTesterNavigationActionsType.NAVBAR_PRESS,
-          data: {screen: args.screen},
-        });
-      }
+      dispatch({
+        type: RNTesterNavigationActionsType.NAVBAR_PRESS,
+        data: {screen: args.screen},
+      });
     },
     [dispatch],
   );
@@ -298,11 +291,16 @@ const RNTesterApp = ({
           backgroundColor: theme.GroupedBackgroundColor,
         })}>
         {activeModule != null ? (
-          <RNTesterModuleContainer
-            module={activeModule}
-            example={activeModuleExample}
-            onExampleCardPress={handleModuleExampleCardPress}
-          />
+          // Host integration: readiness marker for the route smoke suite.
+          <View
+            style={styles.container}
+            testID={`maestro-demo-react-native-${activeModuleKey}-ready`}>
+            <RNTesterModuleContainer
+              module={activeModule}
+              example={activeModuleExample}
+              onExampleCardPress={handleModuleExampleCardPress}
+            />
+          </View>
         ) : (
           <RNTesterModuleList
             sections={activeExampleList}

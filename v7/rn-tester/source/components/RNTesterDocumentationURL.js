@@ -31,11 +31,13 @@ export default RNTesterDocumentationURL;
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    bottom: 0,
-    right: -15,
+    alignItems: 'center',
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
   },
   icon: {
     height: 24,
+    width: 24,
   },
 });

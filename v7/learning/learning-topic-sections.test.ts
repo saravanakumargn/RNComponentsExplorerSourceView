@@ -6,14 +6,21 @@ import {
   groupLessonsIntoSections,
 } from './learning-topic-sections';
 
-function lesson(subtopicId: number, level: number | null, completed = false): LearningSubtopic & { completed: boolean } {
+function lesson(subtopicId: number, level: 1 | 2 | 3, completed = false): LearningSubtopic & { completed: boolean } {
   return {
     subtopicId,
     topicId: 1,
     subtopicName: `Lesson ${subtopicId}`,
-    subtopicDescription: subtopicId === 2 ? 'A lesson description' : null,
+    subtopicDescription: subtopicId === 2 ? 'A lesson description' : '',
     level,
     contentBody: '<p>Lesson</p>',
+    slug: `lesson-${subtopicId}`,
+    position: subtopicId,
+    prerequisites: null,
+    estimatedMinutes: 5,
+    status: 'published',
+    rnVersionVerified: '0.86',
+    updatedAt: '2026-08-07',
     completed,
   };
 }
@@ -21,19 +28,14 @@ function lesson(subtopicId: number, level: number | null, completed = false): Le
 describe('groupLessonsIntoSections', () => {
   it('groups ordered lessons into legacy difficulty sections without changing lesson order', () => {
     const sections = groupLessonsIntoSections([
-      lesson(1, null), lesson(2, 1), lesson(3, 1, true), lesson(4, 2), lesson(5, 3),
+      lesson(1, 1), lesson(2, 1), lesson(3, 1, true), lesson(4, 2), lesson(5, 3),
     ]);
 
     expect(sections.map(({ title, data }) => [title, data.map(({ subtopicId }) => subtopicId)])).toEqual([
-      ['Unknown', [1]],
-      ['Beginner', [2, 3]],
+      ['Beginner', [1, 2, 3]],
       ['Intermediate', [4]],
       ['Advanced', [5]],
     ]);
-  });
-
-  it('keeps an unsupported level discoverable under Unknown', () => {
-    expect(groupLessonsIntoSections([lesson(8, 7)]).map(({ title }) => title)).toEqual(['Unknown']);
   });
 
   it('returns no sections for an empty topic', () => {
@@ -48,9 +50,9 @@ describe('getLessonAccessibilityLabel', () => {
     );
   });
 
-  it('announces the first locked lesson and its subscription destination', () => {
+  it('announces the first locked lesson and where its lock leads', () => {
     expect(getLessonAccessibilityLabel({ lesson: lesson(6, 1), unlocked: false })).toBe(
-      'Lesson 6. Not completed. Locked. Opens subscription options.',
+      'Lesson 6. Not completed. Locked. Opens unlock options.',
     );
   });
 

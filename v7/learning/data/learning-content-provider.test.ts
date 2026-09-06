@@ -19,7 +19,7 @@ describe('assertLearningContentMetadata', () => {
 
   it.each([
     ['missing metadata', null, /metadata is missing/],
-    ['wrong schema', { schemaVersion: 2, contentVersion: LEARNING_CONTENT_VERSION }, /schema version 2/],
+    ['wrong schema', { schemaVersion: 1, contentVersion: LEARNING_CONTENT_VERSION }, /schema version 1/],
     ['wrong content version', { schemaVersion: LEARNING_CONTENT_SCHEMA_VERSION, contentVersion: '0.9.0' }, /content version 0.9.0/],
   ])('rejects %s', async (_name, metadata, expectedError) => {
     const database = {} as never;

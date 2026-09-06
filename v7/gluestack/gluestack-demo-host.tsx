@@ -9,7 +9,9 @@ import { StatusBar } from 'expo-status-bar';
 import { type ComponentType } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { ScopedTheme } from 'uniwind';
 
+import { nestedDemoInitialState } from '@/components/nested-demo-deep-link';
 import { ViewSourceButton } from '@/features/source-viewer/view-source-button';
 
 type ScreenDefinition = {
@@ -129,85 +131,103 @@ const ShowcasesTab = require('./source/official/app/(home)/_tabs/showcases-tab')
 const ComponentsTab = require('./source/official/app/(home)/_tabs/components-tab')
   .default as ComponentType<{ onComponentNavigate?: (path: string) => void }>;
 
-function DemoNavigator({ onBackToCatalog }: { onBackToCatalog: () => void }) {
-  const { colorMode } = useAppTheme();
+const demoRouteNames = [...componentScreens, ...showcaseScreens].map((screen) => screen.name);
 
+function DemoNavigator({ initialDemo, onBackToCatalog }: { initialDemo?: string; onBackToCatalog: () => void }) {
+  const { colorMode } = useAppTheme();
+  const initialState = nestedDemoInitialState('components', initialDemo, demoRouteNames);
+
+  // The explorer compiles every Tailwind demo through one Uniwind entry
+  // (styles/explorer.css), where each demo's palette is registered as a theme.
+  // HeroUI and Gluestack share variable names such as `--background`, so the
+  // active theme decides which palette a screen gets. Scoping it to this
+  // subtree keeps Gluestack's colors out of the rest of the app.
   return (
-    <GluestackUIProvider mode={colorMode}>
-      <StatusBar style={colorMode === 'dark' ? 'light' : 'dark'} />
-      <NavigationIndependentTree>
-        <NavigationContainer>
-          <Stack.Navigator initialRouteName="components">
-            <Stack.Screen
-              name="components"
-              options={{
-                title: 'Gluestack UI',
-                headerLeft: () => <HeaderBackButton onPress={onBackToCatalog} />,
-                headerRight: () => (
-                  <ViewSourceButton
-                    demoId="gluestack-ui"
-                    iconOnly
-                    title="Gluestack UI source"
-                    initialPath="features/gluestack/source/official/app/(home)/_tabs/components-tab.tsx"
-                    onlyInitialPath
-                  />
-                ),
-              }}
-            >
-              {({ navigation }) => (
-                <ComponentsTab
-                  onComponentNavigate={(path) => navigation.navigate(`components/${path}` as never)}
-                />
-              )}
-            </Stack.Screen>
-            <Stack.Screen
-              name="showcases"
-              options={{
-                title: 'Gluestack UI showcases',
-                headerRight: () => (
-                  <ViewSourceButton
-                    demoId="gluestack-ui"
-                    iconOnly
-                    title="Gluestack UI source"
-                    initialPath="features/gluestack/source/official/app/(home)/_tabs/showcases-tab.tsx"
-                    onlyInitialPath
-                  />
-                ),
-              }}
-            >
-              {({ navigation }) => (
-                <ShowcasesTab
-                  onShowcaseNavigate={(path) => navigation.navigate(`showcases/${path}` as never)}
-                />
-              )}
-            </Stack.Screen>
-            {[...componentScreens, ...showcaseScreens].map((screen) => (
+    <ScopedTheme
+      theme={colorMode === 'dark' ? 'gluestack-dark' : 'gluestack-light'}
+    >
+      <GluestackUIProvider mode={colorMode}>
+        <StatusBar style={colorMode === 'dark' ? 'light' : 'dark'} />
+        <NavigationIndependentTree>
+          <NavigationContainer initialState={initialState}>
+            <Stack.Navigator initialRouteName="components">
               <Stack.Screen
-                key={screen.name}
-                name={screen.name}
-                component={screen.component}
+                name="components"
                 options={{
-                  title: screen.title,
+                  title: 'Gluestack UI',
+                  headerLeft: () => <HeaderBackButton onPress={onBackToCatalog} />,
                   headerRight: () => (
                     <ViewSourceButton
                       demoId="gluestack-ui"
                       iconOnly
                       title="Gluestack UI source"
-                      initialPath={screen.sourcePath}
+                      initialPath="features/gluestack/source/official/app/(home)/_tabs/components-tab.tsx"
                       onlyInitialPath
                     />
                   ),
                 }}
-              />
-            ))}
-          </Stack.Navigator>
-        </NavigationContainer>
-      </NavigationIndependentTree>
-    </GluestackUIProvider>
+              >
+                {({ navigation }) => (
+                  <ComponentsTab
+                    onComponentNavigate={(path) => navigation.navigate(`components/${path}` as never)}
+                  />
+                )}
+              </Stack.Screen>
+              <Stack.Screen
+                name="showcases"
+                options={{
+                  title: 'Gluestack UI showcases',
+                  headerRight: () => (
+                    <ViewSourceButton
+                      demoId="gluestack-ui"
+                      iconOnly
+                      title="Gluestack UI source"
+                      initialPath="features/gluestack/source/official/app/(home)/_tabs/showcases-tab.tsx"
+                      onlyInitialPath
+                    />
+                  ),
+                }}
+              >
+                {({ navigation }) => (
+                  <ShowcasesTab
+                    onShowcaseNavigate={(path) => navigation.navigate(`showcases/${path}` as never)}
+                  />
+                )}
+              </Stack.Screen>
+              {[...componentScreens, ...showcaseScreens].map((screen) => (
+                <Stack.Screen
+                  key={screen.name}
+                  name={screen.name}
+                  component={screen.component}
+                  options={{
+                    title: screen.title,
+                    headerRight: () => (
+                      <ViewSourceButton
+                        demoId="gluestack-ui"
+                        iconOnly
+                        title="Gluestack UI source"
+                        initialPath={screen.sourcePath}
+                        onlyInitialPath
+                      />
+                    ),
+                  }}
+                />
+              ))}
+            </Stack.Navigator>
+          </NavigationContainer>
+        </NavigationIndependentTree>
+      </GluestackUIProvider>
+    </ScopedTheme>
   );
 }
 
-export function GluestackDemoHost({ onBackToCatalog }: { onBackToCatalog: () => void }) {
+export function GluestackDemoHost({
+  initialDemo,
+  onBackToCatalog,
+}: {
+  initialDemo?: string;
+  onBackToCatalog: () => void;
+}) {
   const [fontsLoaded] = useFonts(customFonts);
 
   if (!fontsLoaded) return null;
@@ -216,7 +236,7 @@ export function GluestackDemoHost({ onBackToCatalog }: { onBackToCatalog: () => 
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
         <AppThemeProvider>
-          <DemoNavigator onBackToCatalog={onBackToCatalog} />
+          <DemoNavigator initialDemo={initialDemo} onBackToCatalog={onBackToCatalog} />
         </AppThemeProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>

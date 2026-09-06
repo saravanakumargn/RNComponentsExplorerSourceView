@@ -10,6 +10,7 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ScopedTheme } from 'uniwind';
 
+import { nestedDemoInitialState } from '@/components/nested-demo-deep-link';
 import { ViewSourceButton } from '@/features/source-viewer/view-source-button';
 import { ColorSchemeControlProvider } from '@/styles/nativewind-uniwind-adapter';
 
@@ -46,7 +47,13 @@ function sourcePathFor(name: string) {
   return `features/nativewind-ui/screens/${name}.tsx`;
 }
 
-export function NativeWindUIDemoHost({ onBackToCatalog }: { onBackToCatalog: () => void }) {
+export function NativeWindUIDemoHost({
+  initialDemo,
+  onBackToCatalog,
+}: {
+  initialDemo?: string;
+  onBackToCatalog: () => void;
+}) {
   const [colorScheme, setColorScheme] = useState<'dark' | 'light'>('light');
 
   const renderSourceButton = useCallback(
@@ -70,7 +77,13 @@ export function NativeWindUIDemoHost({ onBackToCatalog }: { onBackToCatalog: () 
         <GestureHandlerRootView style={{ flex: 1 }}>
           <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
           <NavigationIndependentTree>
-            <NavigationContainer>
+            <NavigationContainer
+              initialState={nestedDemoInitialState(
+                'index',
+                initialDemo,
+                DEMOS.map((demo) => demo.name),
+              )}
+            >
               <Stack.Navigator initialRouteName="index">
                 <Stack.Screen
                   name="index"

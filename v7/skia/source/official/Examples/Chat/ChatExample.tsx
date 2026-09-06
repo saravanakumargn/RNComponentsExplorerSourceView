@@ -27,7 +27,7 @@ export const Chat = () => {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{ title: "Home", headerBackTitle: "" }}
+          options={{ title: "Home", headerBackButtonDisplayMode: "minimal" }}
         />
         <Stack.Screen
           name="ChatIndex"

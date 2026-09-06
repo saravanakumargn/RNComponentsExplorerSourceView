@@ -5,10 +5,11 @@ import { useRouter } from 'expo-router';
 // The official source is compiled by Metro at runtime. It owns an isolated
 // React Navigation tree so it can coexist with the explorer's Expo Router tree.
 const SkiaExampleApp = require('./source/official/App').default as ComponentType<{
+  initialDemo?: string;
   onExit: () => void;
 }>;
 
-export function SkiaDemoScreen() {
+export function SkiaDemoScreen({ initialDemo }: { initialDemo?: string }) {
   const router = useRouter();
   const handleExit = useCallback(() => {
     if (router.canGoBack()) {
@@ -19,5 +20,5 @@ export function SkiaDemoScreen() {
     router.replace('/');
   }, [router]);
 
-  return <SkiaExampleApp onExit={handleExit} />;
+  return <SkiaExampleApp initialDemo={initialDemo} onExit={handleExit} />;
 }

@@ -8,7 +8,7 @@ import * as SplashScreen from 'expo-splash-screen';
 
 SplashScreen.preventAutoHideAsync();
 
-export default () => {
+export default ({ initialDemo }: { initialDemo?: string }) => {
   const [isReady, setIsReady] = useState(false);
 
   React.useEffect(() => {
@@ -54,7 +54,7 @@ export default () => {
   return (
     <SafeAreaProvider onLayout={onLayoutRootView}>
       <ThemeProvider theme={theme}>
-        <RootNavigator />
+        <RootNavigator initialDemo={initialDemo} />
       </ThemeProvider>
     </SafeAreaProvider>
   );

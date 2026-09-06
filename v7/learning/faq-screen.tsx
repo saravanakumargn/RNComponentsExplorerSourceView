@@ -1,16 +1,165 @@
-import { Link, Stack, useLocalSearchParams } from 'expo-router';
+import { ContentUnavailableView, List, ProgressView, Section, Text, VStack } from '@expo/ui/swift-ui';
+import { font, foregroundStyle, listStyle } from '@expo/ui/swift-ui/modifiers';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { FlatList, Pressable, View } from 'react-native';
-import { ActivityIndicator, Card, Text } from 'react-native-paper';
-import { CenteredEmptyState } from '@/components/screen-layout';
+
+import { NativeNavRow } from '@/components/native-ui/native-row.ios';
+import { NativeScreen } from '@/components/native-ui/native-screen';
+import { NATIVE_TINT } from '@/components/native-ui/native-tokens';
 import { createLearningContentRepository } from '@/features/learning/data/learning-content-repository';
-import { isListItemUnlocked } from '@/features/learning/learning-access-policy';
-import { trackPremiumEvent } from '@/features/learning/learning-analytics';
-import { getLearningNavigationAccessibility } from '@/features/learning/learning-navigation-accessibility';
 import type { Faq, FaqTopic } from '@/features/learning/data/learning-types';
+import { getFreeItemCount, isItemUnlocked } from '@/features/learning/learning-access-policy';
+import { getLearningNavigationAccessibility } from '@/features/learning/learning-navigation-accessibility';
+import { usePaywall } from '@/features/purchases/paywall-provider';
 import { useSubscription } from '@/features/purchases/use-subscription';
 
-export function FaqTopicsScreen() { const db = useSQLiteContext(); const [items, setItems] = useState<FaqTopic[] | null>(null); useEffect(() => { void createLearningContentRepository(db).getFaqTopics().then(setItems); }, [db]); if (!items) return <CenteredEmptyState><ActivityIndicator accessibilityLabel="Loading FAQ topics" /></CenteredEmptyState>; return <FlatList testID="faq-topics-ready" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ gap: 10, padding: 16, paddingBottom: 32 }} ListHeaderComponent={<View style={{ gap: 6, paddingBottom: 8 }}><Text variant="labelLarge" style={{ letterSpacing: 0.8 }}>OFFLINE REFERENCE</Text><Text variant="headlineSmall">Answers when you need them.</Text><Text selectable variant="bodyMedium">Browse practical React Native guidance, saved on your device.</Text></View>} data={items} keyExtractor={(x) => String(x.faqTopicId)} renderItem={({ item, index }) => <Link href={{ pathname: '/faq/[topicId]', params: { topicId: item.faqTopicId } }} asChild><Pressable testID={`faq-topic-${index}`} accessibilityRole="button" accessibilityLabel={getLearningNavigationAccessibility({ title: item.title, destination: 'FAQ questions' })} accessibilityHint="Opens FAQ questions" style={{ minHeight: 44 }}><Card mode="outlined" style={{ borderCurve: 'continuous' }}><Card.Content style={{ alignItems: 'center', flexDirection: 'row', gap: 12, paddingVertical: 14 }}><View style={{ alignItems: 'center', backgroundColor: '#EEF4FF', borderRadius: 20, height: 40, justifyContent: 'center', width: 40 }}><MaterialIcons accessible={false} color="#005AC1" name="help-outline" size={22} /></View><Text style={{ flex: 1 }} variant="titleMedium">{item.title}</Text><MaterialIcons accessible={false} color="#56657A" name="chevron-right" size={25} /></Card.Content></Card></Pressable></Link>} />; }
-export function FaqListScreen() { const { topicId } = useLocalSearchParams<{ topicId: string }>(); const db = useSQLiteContext(); const [items, setItems] = useState<Faq[] | null>(null); const { isSubscribed } = useSubscription(); useEffect(() => { void createLearningContentRepository(db).getFaqsForTopic(Number(topicId)).then(setItems); }, [db, topicId]); if (!items) return <CenteredEmptyState><ActivityIndicator accessibilityLabel="Loading FAQ answers" /></CenteredEmptyState>; return <><Stack.Screen options={{ title: 'FAQ' }} /><FlatList testID="faq-list-ready" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ gap: 10, padding: 16, paddingBottom: 32 }} ListHeaderComponent={<View style={{ gap: 4, paddingBottom: 8 }}><Text variant="labelLarge" style={{ letterSpacing: 0.8 }}>FAQ</Text><Text selectable variant="bodyMedium">The first ten answers are available to read. Locked questions preserve the original upgrade journey.</Text></View>} data={items} keyExtractor={(x) => String(x.faqId)} renderItem={({ item, index }) => { const unlocked = isListItemUnlocked(index, isSubscribed); return <Link href={unlocked ? { pathname: '/faq/read/[faqId]', params: { faqId: item.faqId } } : '/subscription'} asChild><Pressable testID={`faq-item-${index}`} accessibilityRole="button" accessibilityLabel={getLearningNavigationAccessibility({ title: item.question, destination: 'FAQ answer', locked: !unlocked })} accessibilityHint={unlocked ? 'Opens FAQ answer' : 'Opens subscription options'} onPress={unlocked ? undefined : () => trackPremiumEvent('premium_faq_list')} style={{ minHeight: 44 }}><Card mode="outlined" style={{ borderCurve: 'continuous', opacity: unlocked ? 1 : 0.82 }}><Card.Content style={{ alignItems: 'center', flexDirection: 'row', gap: 12, paddingVertical: 13 }}><View style={{ alignItems: 'center', backgroundColor: unlocked ? '#EEF4FF' : '#F2F0F4', borderRadius: 18, height: 36, justifyContent: 'center', width: 36 }}><MaterialIcons accessible={false} color={unlocked ? '#005AC1' : '#56657A'} name={unlocked ? 'question-answer' : 'lock-outline'} size={19} /></View><View style={{ flex: 1, gap: 4 }}><Text numberOfLines={unlocked ? 3 : 1} variant="titleMedium">{item.question}</Text><Text variant="labelSmall">{unlocked ? 'Available offline' : 'Locked'}</Text></View><MaterialIcons accessible={false} color="#56657A" name={unlocked ? 'chevron-right' : 'lock-outline'} size={24} /></Card.Content></Card></Pressable></Link>; }} /></>; }
+const SECONDARY = { type: 'hierarchical', style: 'secondary' } as const;
+const LOCKED = '#8E8E93';
+
+export function FaqTopicsScreen() {
+  const database = useSQLiteContext();
+  const router = useRouter();
+  const [items, setItems] = useState<FaqTopic[] | null>(null);
+
+  useEffect(() => {
+    void createLearningContentRepository(database).getFaqTopics().then(setItems);
+  }, [database]);
+
+  if (!items) {
+    return (
+      <NativeScreen>
+        <VStack spacing={12}>
+          <ProgressView />
+          <Text modifiers={[foregroundStyle(SECONDARY)]}>Loading FAQ topics…</Text>
+        </VStack>
+      </NativeScreen>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <NativeScreen testID="faq-topics-empty">
+        <ContentUnavailableView
+          description="The React Native FAQ is being rebuilt as a troubleshooting reference. Your lessons and interview prep are ready to use in the meantime."
+          systemImage="questionmark.circle"
+          title="No answers here yet"
+        />
+      </NativeScreen>
+    );
+  }
+
+  return (
+    <NativeScreen testID="faq-topics-ready">
+      <List modifiers={[listStyle('insetGrouped')]}>
+        <Section
+          footer={
+            <Text modifiers={[font({ textStyle: 'footnote' }), foregroundStyle(SECONDARY)]}>
+              Practical React Native guidance, saved on your device.
+            </Text>
+          }
+          title="Answers when you need them"
+        >
+          {items.map((topic, index) => (
+            <NativeNavRow
+              key={topic.faqTopicId}
+              label={getLearningNavigationAccessibility({ title: topic.title, destination: 'FAQ questions' })}
+              onPress={() => router.push({ pathname: '/faq/[topicId]', params: { topicId: topic.faqTopicId } })}
+              symbol="questionmark.circle.fill"
+              testID={`faq-topic-${index}`}
+              tint="#5856D6"
+              title={topic.title}
+            />
+          ))}
+        </Section>
+      </List>
+    </NativeScreen>
+  );
+}
+
+/**
+ * The answers in one topic, with the free ones open and the rest behind the
+ * one-time unlock.
+ *
+ * A locked row keeps the routing the Paper `LearningRowLink` established: it
+ * does not navigate, it opens the single shared paywall, and it ends in a lock
+ * rather than a chevron.
+ */
+export function FaqListScreen() {
+  const { topicId } = useLocalSearchParams<{ topicId: string }>();
+  const database = useSQLiteContext();
+  const router = useRouter();
+  const { openPaywall } = usePaywall();
+  const { learningUnlocked } = useSubscription();
+  const [items, setItems] = useState<Faq[] | null>(null);
+
+  useEffect(() => {
+    void createLearningContentRepository(database).getFaqsForTopic(Number(topicId)).then(setItems);
+  }, [database, topicId]);
+
+  if (!items) {
+    return (
+      <NativeScreen>
+        <VStack spacing={12}>
+          <ProgressView />
+          <Text modifiers={[foregroundStyle(SECONDARY)]}>Loading FAQ answers…</Text>
+        </VStack>
+      </NativeScreen>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <>
+        <Stack.Screen options={{ title: 'FAQ' }} />
+        <NativeScreen testID="faq-list-empty">
+          <ContentUnavailableView
+            description="This topic has no published answers yet. Try another topic, or come back after the next content update."
+            systemImage="questionmark.circle"
+            title="No answers in this topic"
+          />
+        </NativeScreen>
+      </>
+    );
+  }
+
+  const freeCount = getFreeItemCount(items.length);
+
+  return (
+    <>
+      <Stack.Screen options={{ title: 'FAQ' }} />
+      <NativeScreen testID="faq-list-ready">
+        <List modifiers={[listStyle('insetGrouped')]}>
+          <Section
+            footer={
+              freeCount > 0 ? (
+                <Text modifiers={[font({ textStyle: 'footnote' }), foregroundStyle(SECONDARY)]}>
+                  {freeCount === 1 ? 'The first answer is open to read.' : `The first ${freeCount} answers are open to read.`} The one-time library unlock opens the rest.
+                </Text>
+              ) : undefined
+            }
+          >
+            {items.map((faq, index) => {
+              const unlocked = isItemUnlocked(index, items.length, learningUnlocked);
+              const href = { pathname: '/faq/read/[faqId]', params: { faqId: faq.faqId } } as const;
+
+              return (
+                <NativeNavRow
+                  caption={unlocked ? 'Available offline' : 'Locked'}
+                  key={faq.faqId}
+                  label={getLearningNavigationAccessibility({ title: faq.question, destination: 'FAQ answer', locked: !unlocked })}
+                  onPress={() => (unlocked ? router.push(href) : openPaywall('premium_faq_list'))}
+                  symbol={unlocked ? 'text.bubble.fill' : 'lock.fill'}
+                  testID={`faq-item-${index}`}
+                  tint={unlocked ? NATIVE_TINT : LOCKED}
+                  title={faq.question}
+                  trailingSymbol={unlocked ? undefined : 'lock.fill'}
+                />
+              );
+            })}
+          </Section>
+        </List>
+      </NativeScreen>
+    </>
+  );
+}

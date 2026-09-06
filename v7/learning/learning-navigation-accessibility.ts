@@ -14,6 +14,6 @@ export function getLearningNavigationAccessibility({
   locked = false,
 }: LearningNavigationAccessibilityInput): string {
   const accessibleTitle = title.trim() || 'Learning content';
-  if (locked) return `${accessibleTitle}. Locked. Opens subscription options.`;
+  if (locked) return `${accessibleTitle}. Locked. Opens unlock options.`;
   return `${accessibleTitle}. Available. Opens ${destination}.`;
 }

@@ -1,13 +1,21 @@
 import { NavigationIndependentTree } from '@react-navigation/native';
 import { type ComponentType } from 'react';
 
-const OfficialVisionCameraExample = require('./source/official/App').default as ComponentType;
+type ReactNativeVisionCameraDemoHostProps = {
+  onBackToCatalog: () => void;
+};
+
+const OfficialVisionCameraExample = require('./source/official/App').default as ComponentType<{
+  onBackToCatalog: () => void;
+}>;
 
 /** Hosts the official VisionCamera v5.2.0 simple-camera example. */
-export function ReactNativeVisionCameraDemoHost() {
+export function ReactNativeVisionCameraDemoHost({
+  onBackToCatalog,
+}: ReactNativeVisionCameraDemoHostProps) {
   return (
     <NavigationIndependentTree>
-      <OfficialVisionCameraExample />
+      <OfficialVisionCameraExample onBackToCatalog={onBackToCatalog} />
     </NavigationIndependentTree>
   );
 }

@@ -15,7 +15,7 @@ describe('getLearningNavigationAccessibility', () => {
       title: 'What is JSX?',
       destination: 'FAQ answer',
       locked: true,
-    })).toBe('What is JSX?. Locked. Opens subscription options.');
+    })).toBe('What is JSX?. Locked. Opens unlock options.');
   });
 
   it('uses a stable fallback when a record has a blank title', () => {

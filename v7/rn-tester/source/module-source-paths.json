@@ -55,7 +55,6 @@
   "PlatformColorExample": "features/rn-tester/source/examples/PlatformColor/PlatformColorExample.js",
   "PixelRatio": "features/rn-tester/source/examples/PixelRatio/PixelRatioExample.js",
   "PointerEventsExample": "features/rn-tester/source/examples/PointerEvents/PointerEventsExample.js",
-  "RTLExample": "features/rn-tester/source/examples/RTL/RTLExample.js",
   "ShareExample": "features/rn-tester/source/examples/Share/ShareExample.js",
   "TimerExample": "features/rn-tester/source/examples/Timer/TimerExample.js",
   "TransformExample": "features/rn-tester/source/examples/Transform/TransformExample.js",
@@ -70,5 +69,14 @@
   "IntersectionObserver": "features/rn-tester/source/examples/IntersectionObserver/IntersectionObserverIndex.js",
   "MutationObserver": "features/rn-tester/source/examples/MutationObserver/MutationObserverIndex.js",
   "PerformanceApiExample": "features/rn-tester/source/examples/Performance/PerformanceApiExample.js",
-  "PlaygroundExample": "features/rn-tester/source/examples/Playground/PlaygroundExample.js"
+  "DrawerLayoutAndroid": "features/rn-tester/source/examples/DrawerLayoutAndroid/DrawerLayoutAndroidExample.js",
+  "PopupMenuAndroidExample": "features/rn-tester/source/examples/PopupMenuAndroid/PopupMenuAndroidExample.js",
+  "SectionListExample": "features/rn-tester/source/examples/SectionList/SectionListIndex.js",
+  "TextInputs with key prop": "features/rn-tester/source/examples/TextInput/TextInputKeyProp.js",
+  "AccessibilityAndroidExample": "features/rn-tester/source/examples/Accessibility/AccessibilityAndroidExample.js",
+  "Animation - GratuitousAnimation": "features/rn-tester/source/examples/AnimatedGratuitousApp/AnExApp.js",
+  "ContentURLAndroid": "features/rn-tester/source/examples/ContentURLAndroid/ContentURLAndroid.js",
+  "PermissionsExampleAndroid": "features/rn-tester/source/examples/PermissionsAndroid/PermissionsExample.js",
+  "ToastAndroidExample": "features/rn-tester/source/examples/ToastAndroid/ToastAndroidExample.js",
+  "LegacyModuleExample": "features/rn-tester/source/examples/TurboModule/LegacyModuleExample.js"
 }

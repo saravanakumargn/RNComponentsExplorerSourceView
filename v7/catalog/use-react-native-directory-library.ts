@@ -71,7 +71,9 @@ export function useReactNativeDirectoryLibrary(packageName: string | undefined) 
       return;
     }
 
-    const cached = readCachedLibrary(packageName);
+    // Bound to a local so the narrowing survives into refreshLibrary's closure.
+    const name = packageName;
+    const cached = readCachedLibrary(name);
     if (cached) {
       setLibrary(cached.data);
     }
@@ -85,7 +87,7 @@ export function useReactNativeDirectoryLibrary(packageName: string | undefined) 
     async function refreshLibrary() {
       try {
         const response = await fetch(
-          `${DIRECTORY_API_URL}?name=${encodeURIComponent(packageName)}`,
+          `${DIRECTORY_API_URL}?name=${encodeURIComponent(name)}`,
           { signal: controller.signal }
         );
 
@@ -94,13 +96,13 @@ export function useReactNativeDirectoryLibrary(packageName: string | undefined) 
         }
 
         const result = (await response.json()) as Record<string, DirectoryLibrary>;
-        const data = result[packageName];
+        const data = result[name];
 
         if (!data) {
           return;
         }
 
-        cacheLibrary(packageName, data);
+        cacheLibrary(name, data);
         setLibrary(data);
       } catch (error) {
         if (error instanceof Error && error.name !== 'AbortError') {

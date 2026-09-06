@@ -10,6 +10,8 @@ import {
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useBottomContentPadding } from '@/components/screen-layout';
+
 import { useExampleTheme } from './hooks/useExampleTheme';
 
 type Props = ScrollViewProps & {
@@ -29,12 +31,12 @@ export default function ScreenWrapper({
   const theme = useExampleTheme();
 
   const insets = useSafeAreaInsets();
+  const bottomPadding = useBottomContentPadding(insets.bottom);
 
   const containerStyle = [
     styles.container,
     {
       backgroundColor: theme.colors.background,
-      paddingBottom: insets.bottom,
       paddingLeft: insets.left,
       paddingRight: insets.left,
     },
@@ -45,7 +47,7 @@ export default function ScreenWrapper({
       {withScrollView ? (
         <ScrollView
           {...rest}
-          contentContainerStyle={contentContainerStyle}
+          contentContainerStyle={[contentContainerStyle, { paddingBottom: bottomPadding }]}
           keyboardShouldPersistTaps="always"
           alwaysBounceVertical={false}
           showsVerticalScrollIndicator={false}

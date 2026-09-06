@@ -16,6 +16,7 @@ import { RectButton } from 'react-native-gesture-handler';
 import { useReducedMotion } from 'react-native-reanimated';
 
 import { BackButton } from '@/components';
+import { useBottomContentPadding } from '@/components/screen-layout';
 import { ViewSourceButton } from '../../../../../source-viewer/view-source-button';
 import { createStack, IS_MACOS } from '@/utils';
 
@@ -55,6 +56,7 @@ function findExamples(search: string) {
 function HomeScreen({ navigation }: HomeScreenProps) {
   const [search, setSearch] = React.useState('');
   const [wasClicked, setWasClicked] = React.useState<string[]>([]);
+  const bottomPadding = useBottomContentPadding(24);
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerSearchBarOptions: {
@@ -92,6 +94,7 @@ function HomeScreen({ navigation }: HomeScreenProps) {
       )}
       renderScrollComponent={(props) => <ScrollView {...props} />}
       ItemSeparatorComponent={ItemSeparator}
+      contentContainerStyle={{ paddingBottom: bottomPadding }}
       style={styles.list}
     />
   );
@@ -147,6 +150,7 @@ function screenOptions(onExit: (() => void) | undefined) {
         : reanimatedExampleSourcePaths[route.name];
 
     return {
+    headerBackButtonDisplayMode: 'minimal' as const,
     headerLeft: IS_MACOS ? undefined : () => <BackButton onExit={onExit} />,
     headerRight: () => (
       <ViewSourceButton

@@ -10,12 +10,6 @@ export const HomeScreen = () => {
   return (
     <ScrollView>
       <HomeScreenButton
-        title="🔧 E2E Tests"
-        description="Run integration tests"
-        route="Tests"
-        testId="Tests"
-      />
-      <HomeScreenButton
         title="API"
         description="API examples"
         route="API"

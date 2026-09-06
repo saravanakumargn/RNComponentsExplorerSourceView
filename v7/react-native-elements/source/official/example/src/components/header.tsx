@@ -10,6 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { Header as HeaderRNE, Icon } from '@rneui/themed';
+import { DemoBackButton } from '../../../../../../../components/demo-back-button';
 import { useBackToCatalog } from '../../../../../navigation-bridge';
 import { ViewSourceButton } from '../../../../../../source-viewer/view-source-button';
 
@@ -65,15 +66,12 @@ const Header: React.FunctionComponent<HeaderComponentProps> = (props) => {
 
   return (
     <HeaderRNE
-      leftComponent={{
-        icon: 'arrow-back',
-        color: '#fff',
-        onPress: backToCatalog,
-      }}
+      leftComponent={<DemoBackButton onPress={backToCatalog} tintColor="#fff" />}
       rightComponent={
         <View style={styles.rightActions}>
           <ViewSourceButton
             demoId="react-native-elements"
+            iconColor="#fff"
             iconOnly
             title="React Native Elements source"
             initialPath={sourcePath}

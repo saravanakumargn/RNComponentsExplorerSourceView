@@ -7,14 +7,22 @@ import PublicApisScreen from './src/screens/PublicApisScreen';
 
 type TabName = 'presets' | 'realtime' | 'apis';
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState<TabName>('presets');
+const TAB_NAMES: TabName[] = ['presets', 'realtime', 'apis'];
+
+// Host integration: `?demo=<tab>` opens one tab directly, for the route smoke
+// suite. This example switches tabs with local state rather than a navigator.
+export default function App({ initialDemo }: { initialDemo?: string }) {
+  const [activeTab, setActiveTab] = useState<TabName>(
+    TAB_NAMES.includes(initialDemo as TabName) ? (initialDemo as TabName) : 'presets',
+  );
 
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.container}>
         {/* Content */}
-        <View style={styles.content}>
+        <View
+          style={styles.content}
+          testID={`maestro-demo-react-native-pulsar-${activeTab}-ready`}>
           {activeTab === 'presets' && <PresetsScreen />}
           {activeTab === 'realtime' && <RealtimeComposerScreen />}
           {activeTab === 'apis' && <PublicApisScreen />}

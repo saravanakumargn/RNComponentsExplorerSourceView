@@ -87,8 +87,13 @@ export default function ExpoObserveScreen() {
   const { theme } = useTheme();
 
   return (
+    // The outer catalog stack now owns the header (back + view-source button) for this
+    // screen, so this inner navigator's own header stays hidden to avoid stacking two
+    // headers. `filteredParams` remains reachable via the swipe-back gesture / hardware
+    // back to return to `index`.
     <Stack.Navigator
       screenOptions={{
+        headerShown: false,
         headerStyle: { backgroundColor: theme.background.default },
         headerTintColor: theme.icon.info,
         headerTitleStyle: { color: theme.text.default },

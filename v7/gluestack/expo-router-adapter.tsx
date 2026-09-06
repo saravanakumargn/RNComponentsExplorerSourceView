@@ -13,7 +13,12 @@ export function useRouter() {
     () => ({
       back: () => navigation.goBack(),
       push: (href: string) => navigation.navigate(toRouteName(href) as never),
-      replace: (href: string) => navigation.replace(toRouteName(href) as never),
+      // `replace` exists on the stack navigator this demo is hosted in, but not
+      // on the generic NavigationProp that useNavigation() infers here.
+      replace: (href: string) =>
+        (navigation as unknown as { replace: (name: string) => void }).replace(
+          toRouteName(href)
+        ),
     }),
     [navigation]
   );

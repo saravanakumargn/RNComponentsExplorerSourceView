@@ -1,5 +1,5 @@
 import React, {useState, useCallback} from 'react';
-import {I18nManager, StyleSheet, Modal, FlatList, SafeAreaView, View, TouchableOpacity, Text, Image, Switch} from 'react-native';
+import {StyleSheet, Modal, FlatList, SafeAreaView, View, TouchableOpacity, Text, Image} from 'react-native';
 import testIDs from '../testIDs';
 import CalendarScreen from './calendarScreen';
 import CalendarPlaygroundScreen from './calendarPlaygroundScreen';
@@ -10,10 +10,10 @@ import NewCalendarListScreen from './newCalendarListScreen';
 import ExpandableCalendarScreen from './expandableCalendarScreen';
 import TimelineCalendarScreen from './timelineCalendarScreen';
 import PlaygroundScreen from './playgroundScreen';
+import {DemoBackButton} from '../../../../../../../components/demo-back-button';
 import {useBackToCatalog} from '../../../../../navigation-bridge';
 import {ViewSourceButton} from '../../../../../../source-viewer/view-source-button';
 
-const settingsIcon = require('../img/settings.png');
 const closeIcon = require('../img/close.png');
 
 const screens = [
@@ -30,48 +30,33 @@ const screens = [
   {testID: testIDs.menu.PLAYGROUND, title: 'Playground', screen: PlaygroundScreen, sourcePath: 'features/react-native-calendars/source/official/example/src/screens/playgroundScreen.tsx'}
 ];
 
-const MenuScreen = () => {
+// Host integration: `?demo=<title>` opens one screen directly, for the route
+// smoke suite. This example opens each screen in a modal driven by local state
+// rather than by a navigator, so the deep link seeds that state. Titles are the
+// only stable identifier the list carries, and they are unique.
+const MenuScreen = ({initialDemo}: {initialDemo?: string}) => {
   const backToCatalog = useBackToCatalog();
-  const [forceRTL, setForceRTL] = useState(I18nManager.isRTL);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [nextScreen, setNextScreen] = useState(screens[0]);
+  const initialScreen = screens.find(screen => screen.title === initialDemo);
+  const [showModal, setShowModal] = useState(initialScreen !== undefined);
+  const [nextScreen, setNextScreen] = useState(initialScreen ?? screens[0]);
 
   const keyExtractor = (item: any) => `${item.title}-${item.testID}`;
-
-  const toggleRTL = useCallback((value) => {
-    I18nManager.forceRTL(value);
-    setForceRTL(value);
-  }, []);
-
-  const toggleSettings = () => {
-    setShowSettings(!showSettings);
-  };
 
   const onPress = useCallback(item => {
     setNextScreen(item);
     setShowModal(true);
   }, []);
 
-  const renderSettings = () => {
-    return (
-      <View style={styles.settingsContainer}>
-        <View style={styles.switchContainer}>
-          <Text style={styles.label}>Force RTL</Text>
-          <Switch value={forceRTL} onValueChange={toggleRTL}/>
-        </View>
-      </View>
-    );
-  };
-
   const renderModal = () => {
     const ScreenComponent = nextScreen.screen;
 
     return (
       <Modal visible={showModal} animationType="slide">
-        <SafeAreaView style={styles.screenContainer}>
+        <SafeAreaView
+          style={styles.screenContainer}
+          testID={`maestro-demo-react-native-calendars-${nextScreen.title}-ready`}>
           <View style={styles.topBar}>
-            <TouchableOpacity style={styles.topBarButton} onPress={() => setShowModal(false)}><Image source={closeIcon}/></TouchableOpacity>
+            <TouchableOpacity testID="calendars_modal_close" style={styles.topBarButton} onPress={() => setShowModal(false)}><Image source={closeIcon}/></TouchableOpacity>
             <Text style={styles.topBarTitle}>{nextScreen.title}</Text>
             <View style={styles.topBarSource}>
               <ViewSourceButton
@@ -100,27 +85,26 @@ const MenuScreen = () => {
   const renderHeader = () => {
     return (
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={backToCatalog}>
-          <Text style={styles.backIcon}>‹</Text>
-        </TouchableOpacity>
+        <View style={styles.backButton}>
+          <DemoBackButton onPress={backToCatalog} />
+        </View>
         <Text style={styles.title}>React Native Calendars</Text>
         <View style={styles.headerActions}>
           <ViewSourceButton demoId="react-native-calendars" iconOnly title="React Native Calendars source" />
-          <TouchableOpacity onPress={toggleSettings}><Image source={settingsIcon} style={styles.settingsButton}/></TouchableOpacity>
         </View>
       </View>
     );
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.container}>
       {renderHeader()}
-      {showSettings && renderSettings()}
       <FlatList
         data={screens}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.menuContent}
       />
       {renderModal()}
     </SafeAreaView>
@@ -132,6 +116,9 @@ export default MenuScreen;
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1
+  },
+  container: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
@@ -147,46 +134,22 @@ const styles = StyleSheet.create({
     color: 'black'
   },
   backButton: {
-    width: 30,
     alignItems: 'flex-start'
-  },
-  backIcon: {
-    fontSize: 36,
-    lineHeight: 30,
-    color: 'black'
   },
   menu: {
     margin: 16,
     borderBottomWidth: StyleSheet.hairlineWidth
   },
+  menuContent: {
+    paddingBottom: 24,
+  },
   menuText: {
     fontSize: 18,
     color: 'black'
   },
-  settingsButton: {
-    tintColor: 'black'
-  },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  settingsContainer: {
-    position: 'absolute',
-    top: 38,
-    right: 0,
-    backgroundColor: 'lightgrey',
-    margin: 16,
-    padding: 16,
-    borderRadius: 4,
-    zIndex: 100
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  label: {
-    marginRight: 12,
-    fontSize: 16
   },
   topBar: {
     flexDirection: 'row',

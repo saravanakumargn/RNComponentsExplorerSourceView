@@ -8,7 +8,7 @@ import type {
   StackScreenProps,
 } from '@react-navigation/stack';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Icon } from '@swmansion/icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from 'react';
 import {
   Dimensions,
@@ -71,6 +71,7 @@ function AppContent() {
                   height: Dimensions.get('window').height,
                   backgroundColor: COLORS.offWhite,
                 },
+                headerBackButtonDisplayMode: 'minimal',
                 headerRight: () => <ConsoleHeaderButton />,
                 headerStyle: {
                   backgroundColor: COLORS.offWhite,
@@ -217,7 +218,7 @@ function AppContent() {
     return (
       <View style={styles.headerControls}>
         <View style={styles.searchBar}>
-          <Icon name="search" size={20} color={COLORS.NAVY} />
+          <Ionicons name="search" size={20} color={COLORS.NAVY} />
           <TextInput
             testID="search-examples"
             accessibilityLabel="Search examples"
@@ -237,7 +238,7 @@ function AppContent() {
               accessibilityLabel="Clear search"
               hitSlop={8}
               onPress={() => onChangeSearchQuery('')}>
-              <Icon name="cross-circle" size={20} color={COLORS.GRAY} />
+              <Ionicons name="close-circle" size={20} color={COLORS.GRAY} />
             </Pressable>
           )}
         </View>
@@ -311,7 +312,7 @@ function AppContent() {
         onPress={() => onPressItem(name)}>
         <Text style={styles.text}>{name}</Text>
         {Platform.OS !== 'macos' && !disabled && (
-          <Icon name="chevron-small-right" size={24} color="#bbb" />
+          <Ionicons name="chevron-forward" size={24} color="#bbb" />
         )}
       </Touchable>
     );

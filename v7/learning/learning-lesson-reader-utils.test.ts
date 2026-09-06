@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  buildLessonReaderHtml,
   createLessonCompletionGate,
   getLearningReaderFontSize,
   getLessonProgressUnavailableFeedback,
@@ -59,25 +58,6 @@ describe('lesson reader presentation', () => {
 
   it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])('uses the standard size for malformed font scales: %o', (fontScale) => {
     expect(getLearningReaderFontSize(fontScale)).toBe(18);
-  });
-
-  it('builds a mobile HTML document with readable margins and resilient code/media styles', () => {
-    const html = buildLessonReaderHtml('<h1>Welcome</h1><pre>const app = true;</pre><img src="image.png">', 27);
-
-    expect(html).toContain('width=device-width, initial-scale=1');
-    expect(html).toContain('max(20px, env(safe-area-inset-left))');
-    expect(html).toContain('pre{white-space:pre-wrap;overflow-wrap:anywhere}');
-    expect(html).toContain('img{display:block;max-width:100%;height:auto}');
-    expect(html).toContain('font:27px');
-    expect(html).toContain('<h1>Welcome</h1>');
-  });
-
-  it('renders local Highlight.js tokens for labelled code blocks in every WebView reader document', () => {
-    const html = buildLessonReaderHtml('<pre><code class="language-javascript">const app = true;</code></pre>');
-
-    expect(html).toContain('.hljs{');
-    expect(html).toContain('class="language-javascript hljs"');
-    expect(html).toContain('hljs-keyword');
   });
 
   it.each(['', '   ', '\n\t'])('rejects blank lesson HTML: %j', (content) => {

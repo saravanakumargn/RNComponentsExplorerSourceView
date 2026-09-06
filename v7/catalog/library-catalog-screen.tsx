@@ -5,11 +5,17 @@ import {
   BottomSheetModal,
   BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
-import { Link, useRouter } from 'expo-router';
+import { Link, Stack, useRouter } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { View } from 'react-native';
-import { Button, Card, Dialog, Divider, FAB, IconButton, List, Portal, Searchbar, Text, useTheme } from 'react-native-paper';
+import { Pressable, View } from 'react-native';
+import { Button, Dialog, Divider, IconButton, List, Portal, Text, useTheme } from 'react-native-paper';
+import type { SFSymbol } from 'sf-symbols-typescript';
 
+import { NativeBadge } from '@/components/native-ui/native-badge';
+import { NativeCard } from '@/components/native-ui/native-card';
+import { NativeText } from '@/components/native-ui/native-text';
+import { NATIVE_BACKGROUND, NATIVE_COLORS, NATIVE_TINT } from '@/components/native-ui/native-tokens';
 import { CenteredEmptyState, ScreenLayout } from '@/components/screen-layout';
 import { libraries, libraryCategories, type Library } from '@/data/libraries';
 import { useReactNativeDirectoryLibrary } from '@/features/catalog/use-react-native-directory-library';
@@ -166,6 +172,30 @@ function LibraryDetailsDialog({
   );
 }
 
+/**
+ * One library, as a grouped iOS card.
+ *
+ * What it replaced: `Card mode="outlined"` — a 1pt stroked rectangle with the
+ * Material type ramp and `MaterialIcons` accessories. Nothing about it was
+ * wrong, and stacked forty times down the app's landing screen it was the
+ * flattest surface in the product: every card the same weight, the version
+ * inline in the title so the eye had to read past it, and a stroke doing the job
+ * that contrast does on iOS.
+ *
+ * What it is now: the same card the Learning screens use. No stroke; white on
+ * the grouped background, which is how iOS separates a card from its page. The
+ * version moves to the trailing edge as a value, the way a Settings row shows
+ * its current setting, so a title is a title and a scan down the column reads
+ * titles rather than title-plus-number. Accessories are SF Symbols at the
+ * system's own weight.
+ *
+ * The press structure is unchanged from the Paper version: the card navigates
+ * and the two accessory buttons are nested inside it. Worth knowing when this is
+ * next touched — a nested control inside an accessibility element gets merged
+ * into it on iOS, so the info and pin buttons are likely not separately
+ * reachable by VoiceOver. That predates this restyle and is left alone here
+ * rather than changed silently behind a visual commit.
+ */
 function LibraryCard({
   library,
   isPinned,
@@ -175,7 +205,6 @@ function LibraryCard({
   isPinned: boolean;
   onTogglePin: (libraryId: string) => void;
 }) {
-  const theme = useTheme();
   const [detailsVisible, setDetailsVisible] = useState(false);
 
   return (
@@ -184,49 +213,45 @@ function LibraryCard({
         href={{ pathname: '/library/[library]', params: { library: library.id } }}
         asChild
       >
-        <Card
-          accessibilityLabel={`Open ${library.title} demo`}
-          mode="outlined"
-          style={{ borderCurve: 'continuous', borderRadius: 16, overflow: 'hidden' }}
-        >
-          <Card.Content style={{ gap: 8, padding: 12 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', gap: 6 }}>
-                <Text variant="titleMedium">{library.title}</Text>
-                <Text
-                  variant="labelSmall"
-                  style={{ color: theme.colors.onSurfaceVariant, fontVariant: ['tabular-nums'] }}
-                >
-                  {library.demoVersion}
-                </Text>
-              </View>
-              <IconButton
-                icon="information-outline"
-                size={18}
-                style={{ margin: -6 }}
-                iconColor={theme.colors.onSurfaceVariant}
+        <Pressable accessibilityLabel={`Open ${library.title} demo`} accessibilityRole="button">
+          <NativeCard padding={13} style={{ gap: 6 }}>
+            <View style={{ alignItems: 'center', flexDirection: 'row', gap: 8 }}>
+              {/* The title takes the row and the version yields, not the other
+                  way round. `release-2026-08-01-1558` is a source tag rather
+                  than a semver, and at 23 characters it pushed "TanStack Query"
+                  down to "TanStack Q…" — losing the name you scan the column
+                  for to keep the tail of a date. The full version is in the
+                  details dialog either way. */}
+              <NativeText numberOfLines={1} style={{ flex: 1 }} textStyle="headline">
+                {library.title}
+              </NativeText>
+              {library.status === 'reference' ? <NativeBadge label="Reference" /> : null}
+              <NativeText
+                numberOfLines={1}
+                style={{ flexShrink: 0, fontVariant: ['tabular-nums'], maxWidth: 116 }}
+                textStyle="footnote"
+                tone="secondary"
+              >
+                {library.demoVersion}
+              </NativeText>
+              <CardAccessory
                 accessibilityLabel={`View ${library.title} details`}
                 onPress={() => setDetailsVisible(true)}
+                symbol="info.circle"
               />
-              <IconButton
-                icon={isPinned ? 'pin' : 'pin-outline'}
-                size={18}
-                style={{ margin: -6 }}
-                iconColor={isPinned ? theme.colors.primary : theme.colors.onSurfaceVariant}
+              <CardAccessory
                 accessibilityLabel={isPinned ? `Unpin ${library.title}` : `Pin ${library.title}`}
                 onPress={() => onTogglePin(library.id)}
+                symbol={isPinned ? 'pin.fill' : 'pin'}
+                tint={isPinned ? NATIVE_TINT : undefined}
               />
             </View>
 
-            <Text
-              numberOfLines={2}
-              variant="bodyMedium"
-              style={{ color: theme.colors.onSurfaceVariant }}
-            >
+            <NativeText numberOfLines={2} textStyle="footnote" tone="secondary">
               {library.shortDescription}
-            </Text>
-          </Card.Content>
-        </Card>
+            </NativeText>
+          </NativeCard>
+        </Pressable>
       </Link>
 
       <LibraryDetailsDialog
@@ -235,6 +260,38 @@ function LibraryCard({
         onDismiss={() => setDetailsVisible(false)}
       />
     </>
+  );
+}
+
+/**
+ * A card's trailing accessory button.
+ *
+ * Paper's `IconButton` reserved a 48pt Material touch target and drew a ripple,
+ * which is why two of them pushed the title's baseline around. This is a bare
+ * symbol with `hitSlop` doing the work instead: the target stays finger-sized
+ * without the glyph claiming the space.
+ */
+function CardAccessory({
+  accessibilityLabel,
+  onPress,
+  symbol,
+  tint,
+}: {
+  accessibilityLabel: string;
+  onPress: () => void;
+  symbol: SFSymbol;
+  tint?: string;
+}) {
+  return (
+    <Pressable
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      hitSlop={10}
+      onPress={onPress}
+      style={({ pressed }) => ({ opacity: pressed ? 0.4 : 1, paddingHorizontal: 2 })}
+    >
+      <SymbolView name={symbol} size={19} tintColor={tint ?? NATIVE_COLORS.secondaryLabel} />
+    </Pressable>
   );
 }
 
@@ -332,14 +389,37 @@ export function LibraryCatalogScreen() {
   return (
     <BottomSheetModalProvider>
       <View style={{ flex: 1 }}>
-        <ScreenLayout testID="maestro-catalog-ready">
-          <Searchbar
-            placeholder="Search libraries"
-            value={query}
-            onChangeText={setQuery}
-            testID="maestro-catalog-search"
-          />
-
+        <Stack.Screen
+          options={{
+            headerSearchBarOptions: {
+              placeholder: 'Search libraries',
+              onChangeText: (event) => setQuery(event.nativeEvent.text),
+            },
+            headerRight:
+              pinnedLibraries.length > 0
+                ? () => (
+                    <IconButton
+                      icon="pin"
+                      accessibilityLabel={`View ${pinnedLibraries.length} pinned ${pinnedLibraries.length === 1 ? 'library' : 'libraries'}`}
+                      onPress={() => pinnedSheetRef.current?.present()}
+                    />
+                  )
+                : undefined,
+          }}
+        />
+        <ScreenLayout
+          testID="maestro-catalog-ready"
+          // The grouped background, scoped to this screen rather than to
+          // `ScreenLayout`: a card with no stroke needs the page behind it to be
+          // darker than it is, and `ScreenLayout` is shared with twenty Material
+          // demo screens that should keep the theme's own background.
+          style={{ backgroundColor: NATIVE_BACKGROUND }}
+          // The default flexGrow:1 keeps the content taller than the viewport,
+          // so iOS cannot clamp back to the true top when a search filters the
+          // list down — leaving the first result stranded under the header.
+          // Only stretch when the empty state needs centring.
+          contentContainerStyle={filteredLibraries.length === 0 ? undefined : { flexGrow: 0 }}
+        >
           {libraryCategories.map((category) => {
             const categoryLibraries = filteredLibraries.filter(
               (library) => library.category === category.key
@@ -350,10 +430,10 @@ export function LibraryCatalogScreen() {
             return (
               <View key={category.key} style={{ gap: 8 }}>
                 <View style={{ gap: 2 }}>
-                  <Text variant="titleMedium">{category.title}</Text>
-                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                  <NativeText textStyle="title3">{category.title}</NativeText>
+                  <NativeText textStyle="footnote" tone="secondary">
                     {category.description}
-                  </Text>
+                  </NativeText>
                 </View>
 
                 {categoryLibraries.map((library) => (
@@ -370,21 +450,14 @@ export function LibraryCatalogScreen() {
 
           {filteredLibraries.length === 0 ? (
             <CenteredEmptyState>
-              <Text variant="titleMedium">No libraries match &ldquo;{query}&rdquo;</Text>
-              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
+              <NativeText textStyle="headline">No libraries match &ldquo;{query}&rdquo;</NativeText>
+              <NativeText style={{ textAlign: 'center' }} textStyle="footnote" tone="secondary">
                 Try a different title, description keyword, or package name.
-              </Text>
+              </NativeText>
             </CenteredEmptyState>
           ) : null}
         </ScreenLayout>
 
-        <FAB
-          icon="pin"
-          visible={pinnedLibraries.length > 0}
-          style={{ position: 'absolute', right: 16, bottom: 16 }}
-          accessibilityLabel={`View ${pinnedLibraries.length} pinned ${pinnedLibraries.length === 1 ? 'library' : 'libraries'}`}
-          onPress={() => pinnedSheetRef.current?.present()}
-        />
       </View>
 
       <PinnedLibrarySheet

@@ -302,11 +302,11 @@ export const Toolbar: FC<ToolbarProps> = ({
   };
 
   const keyExtractor = (item: Item) => item.name;
+  const gridProps = layout === 'grid' ? { numColumns: GRID_COLUMNS } : {};
 
   return (
     <FlatList
       key={layout}
-      numColumns={layout === 'grid' ? GRID_COLUMNS : undefined}
       horizontal={layout === 'horizontal'}
       scrollEnabled={layout === 'horizontal'}
       data={STYLE_ITEMS}
@@ -314,6 +314,7 @@ export const Toolbar: FC<ToolbarProps> = ({
       keyExtractor={keyExtractor}
       style={styles.container}
       testID="toolbar"
+      {...gridProps}
     />
   );
 };

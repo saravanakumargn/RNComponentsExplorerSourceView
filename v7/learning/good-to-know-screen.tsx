@@ -1,17 +1,169 @@
-import { Link, Stack, useLocalSearchParams } from 'expo-router';
+import { ContentUnavailableView, List, ProgressView, Section, Text, VStack } from '@expo/ui/swift-ui';
+import { font, foregroundStyle, listStyle } from '@expo/ui/swift-ui/modifiers';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { FlatList, Pressable, useWindowDimensions, View } from 'react-native';
-import { ActivityIndicator, Card, Text } from 'react-native-paper';
-import { WebView } from 'react-native-webview';
-import { CenteredEmptyState } from '@/components/screen-layout';
-import { createLearningContentRepository } from '@/features/learning/data/learning-content-repository';
-import { getLearningNavigationAccessibility } from '@/features/learning/learning-navigation-accessibility';
-import { buildLessonReaderHtml, getLearningReaderFontSize } from '@/features/learning/learning-lesson-reader-utils';
-import type { LearningCategory, LearningLibraryTool } from '@/features/learning/data/learning-types';
 
-function Loading() { return <CenteredEmptyState><ActivityIndicator /></CenteredEmptyState>; }
-export function GoodToKnowCategoriesScreen() { const db = useSQLiteContext(); const [items, setItems] = useState<LearningCategory[] | null>(null); useEffect(() => { void createLearningContentRepository(db).getCategories().then(setItems); }, [db]); if (!items) return <Loading />; return <FlatList testID="good-to-know-categories-ready" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ gap: 10, padding: 16, paddingBottom: 32 }} ListHeaderComponent={<View style={{ gap: 6, paddingBottom: 8 }}><Text variant="labelLarge" style={{ letterSpacing: 0.8 }}>YOUR TOOLKIT</Text><Text variant="headlineSmall">Useful things to keep close.</Text><Text selectable variant="bodyMedium">Libraries, tools, and ecosystem context for day-to-day React Native work.</Text></View>} data={items} keyExtractor={(x) => String(x.categoryId)} renderItem={({ item, index }) => <Link href={{ pathname: '/good-to-know/[categoryId]', params: { categoryId: item.categoryId } }} asChild><Pressable testID={`good-to-know-category-${index}`} accessibilityRole="button" accessibilityLabel={getLearningNavigationAccessibility({ title: item.name, destination: 'Good to know resources' })} accessibilityHint="Opens Good to know resources" style={{ minHeight: 44 }}><Card mode="outlined" style={{ borderCurve: 'continuous' }}><Card.Content style={{ alignItems: 'center', flexDirection: 'row', gap: 12, paddingVertical: 14 }}><View style={{ alignItems: 'center', backgroundColor: '#EEF4FF', borderRadius: 20, height: 40, justifyContent: 'center', width: 40 }}><MaterialIcons accessible={false} color="#005AC1" name="tips-and-updates" size={22} /></View><Text style={{ flex: 1 }} variant="titleMedium">{item.name}</Text><MaterialIcons accessible={false} color="#56657A" name="chevron-right" size={25} /></Card.Content></Card></Pressable></Link>} />; }
-export function GoodToKnowListScreen() { const { categoryId } = useLocalSearchParams<{ categoryId: string }>(); const db = useSQLiteContext(); const [items, setItems] = useState<LearningLibraryTool[] | null>(null); useEffect(() => { void createLearningContentRepository(db).getLibraryToolsForCategory(Number(categoryId)).then(setItems); }, [db, categoryId]); if (!items) return <Loading />; return <><Stack.Screen options={{ title: 'Good to know' }} /><FlatList testID="good-to-know-list-ready" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ gap: 10, padding: 16, paddingBottom: 32 }} ListHeaderComponent={<View style={{ gap: 4, paddingBottom: 8 }}><Text variant="labelLarge" style={{ letterSpacing: 0.8 }}>GOOD TO KNOW</Text><Text selectable variant="bodyMedium">A practical, offline reference for the tools around React Native.</Text></View>} data={items} keyExtractor={(x) => String(x.libraryToolId)} renderItem={({ item, index }) => <Link href={{ pathname: '/good-to-know/read/[itemId]', params: { itemId: item.libraryToolId } }} asChild><Pressable testID={`good-to-know-item-${index}`} accessibilityRole="button" accessibilityLabel={getLearningNavigationAccessibility({ title: item.name, destination: 'Good to know resource' })} accessibilityHint="Opens Good to know resource" style={{ minHeight: 44 }}><Card mode="outlined" style={{ borderCurve: 'continuous' }}><Card.Content style={{ alignItems: 'center', flexDirection: 'row', gap: 12, paddingVertical: 13 }}><View style={{ alignItems: 'center', backgroundColor: '#EEF4FF', borderRadius: 18, height: 36, justifyContent: 'center', width: 36 }}><MaterialIcons accessible={false} color="#005AC1" name="extension" size={19} /></View><Text style={{ flex: 1 }} variant="titleMedium">{item.name}</Text><MaterialIcons accessible={false} color="#56657A" name="chevron-right" size={24} /></Card.Content></Card></Pressable></Link>} /></>; }
-export function GoodToKnowReaderScreen() { const { itemId } = useLocalSearchParams<{ itemId: string }>(); const db = useSQLiteContext(); const [item, setItem] = useState<LearningLibraryTool | null | undefined>(); const { fontScale } = useWindowDimensions(); useEffect(() => { void createLearningContentRepository(db).getLibraryTool(Number(itemId)).then(setItem).catch(() => setItem(null)); }, [db, itemId]); if (item === undefined) return <Loading />; if (!item) return <CenteredEmptyState><Text>This item is unavailable.</Text></CenteredEmptyState>; return <View testID="good-to-know-reader-ready" style={{ flex: 1 }}><Stack.Screen options={{ title: item.name }} /><WebView originWhitelist={['*']} source={{ html: buildLessonReaderHtml(`<h2>${item.name}</h2>${item.explanation}`, getLearningReaderFontSize(fontScale)) }} /></View>; }
+import { NativeNavRow } from '@/components/native-ui/native-row.ios';
+import { NativeScreen } from '@/components/native-ui/native-screen';
+import { getLearningAreaStyle } from '@/components/native-ui/native-tokens';
+import { createLearningContentRepository } from '@/features/learning/data/learning-content-repository';
+import type { LearningCategory, LearningLibraryTool } from '@/features/learning/data/learning-types';
+import { getLearningNavigationAccessibility } from '@/features/learning/learning-navigation-accessibility';
+
+/** The reader stays React Native on every platform — see its own file for why. */
+export { GoodToKnowReaderScreen } from '@/features/learning/good-to-know-reader-screen';
+
+const SECONDARY = { type: 'hierarchical', style: 'secondary' } as const;
+
+/**
+ * The area's own hue, taken from the shared token rather than repeated here, so
+ * a row on this screen and the "Good to know" row on the Learning home cannot
+ * drift to different browns.
+ */
+const { tint: GOOD_TO_KNOW_TINT } = getLearningAreaStyle('good-to-know');
+
+/**
+ * The categories that group every library and tooling reference.
+ *
+ * `getCategories` synthesises its single row from a count rather than reading a
+ * categories table, so it returns nothing at all when no `library_tools` row is
+ * published. The shipped database has ten, so the list is the live path and the
+ * empty state is the guard — `good-to-know.yaml` covers both, choosing on
+ * whether `good-to-know-category-0` is on screen.
+ */
+export function GoodToKnowCategoriesScreen() {
+  const database = useSQLiteContext();
+  const router = useRouter();
+  const [items, setItems] = useState<LearningCategory[] | null>(null);
+
+  useEffect(() => {
+    void createLearningContentRepository(database).getCategories().then(setItems);
+  }, [database]);
+
+  if (!items) {
+    return (
+      <NativeScreen>
+        <VStack spacing={12}>
+          <ProgressView />
+          <Text modifiers={[foregroundStyle(SECONDARY)]}>Loading your toolkit…</Text>
+        </VStack>
+      </NativeScreen>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <NativeScreen testID="good-to-know-categories-empty">
+        <ContentUnavailableView
+          description="Library and tooling references are not part of this release. The Components & API tab documents every library in the catalogue, with a runnable demo for each."
+          systemImage="lightbulb"
+          title="Nothing here yet"
+        />
+      </NativeScreen>
+    );
+  }
+
+  return (
+    <NativeScreen testID="good-to-know-categories-ready">
+      <List modifiers={[listStyle('insetGrouped')]}>
+        <Section
+          footer={
+            <Text modifiers={[font({ textStyle: 'footnote' }), foregroundStyle(SECONDARY)]}>
+              What else exists beyond React Native, and when it is the better choice.
+            </Text>
+          }
+          title="Useful things to keep close"
+        >
+          {items.map((category, index) => (
+            <NativeNavRow
+              key={category.categoryId}
+              label={getLearningNavigationAccessibility({ title: category.name, destination: 'Good to know resources' })}
+              onPress={() => router.push({ pathname: '/good-to-know/[categoryId]', params: { categoryId: category.categoryId } })}
+              symbol="lightbulb.fill"
+              testID={`good-to-know-category-${index}`}
+              tint={GOOD_TO_KNOW_TINT}
+              title={category.name}
+            />
+          ))}
+        </Section>
+      </List>
+    </NativeScreen>
+  );
+}
+
+/**
+ * The references inside one category.
+ *
+ * Nothing here is gated: unlike FAQ and interview prep, Good to know carries no
+ * paywall, so every row navigates and none of them ends in a lock.
+ *
+ * The `Stack.Screen` title is load-bearing beyond the header —
+ * `accessibility-navigation.yaml` taps "Good to know" to walk back from the
+ * reader to this list.
+ */
+export function GoodToKnowListScreen() {
+  const { categoryId } = useLocalSearchParams<{ categoryId: string }>();
+  const database = useSQLiteContext();
+  const router = useRouter();
+  const [items, setItems] = useState<LearningLibraryTool[] | null>(null);
+
+  useEffect(() => {
+    void createLearningContentRepository(database).getLibraryToolsForCategory(Number(categoryId)).then(setItems);
+  }, [database, categoryId]);
+
+  if (!items) {
+    return (
+      <NativeScreen>
+        <VStack spacing={12}>
+          <ProgressView />
+          <Text modifiers={[foregroundStyle(SECONDARY)]}>Loading references…</Text>
+        </VStack>
+      </NativeScreen>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <>
+        <Stack.Screen options={{ title: 'Good to know' }} />
+        <NativeScreen testID="good-to-know-list-empty">
+          <ContentUnavailableView
+            description="This category has no published references yet. The Components & API tab documents every library in the catalogue."
+            systemImage="lightbulb"
+            title="Nothing in this category"
+          />
+        </NativeScreen>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Stack.Screen options={{ title: 'Good to know' }} />
+      <NativeScreen testID="good-to-know-list-ready">
+        <List modifiers={[listStyle('insetGrouped')]}>
+          <Section
+            footer={
+              <Text modifiers={[font({ textStyle: 'footnote' }), foregroundStyle(SECONDARY)]}>
+                Each entry answers the same five questions, so you can compare them quickly.
+              </Text>
+            }
+          >
+            {items.map((tool, index) => (
+              <NativeNavRow
+                key={tool.libraryToolId}
+                label={getLearningNavigationAccessibility({ title: tool.name, destination: 'Good to know resource' })}
+                onPress={() => router.push({ pathname: '/good-to-know/read/[itemId]', params: { itemId: tool.libraryToolId } })}
+                symbol="puzzlepiece.extension.fill"
+                testID={`good-to-know-item-${index}`}
+                tint={GOOD_TO_KNOW_TINT}
+                title={tool.name}
+              />
+            ))}
+          </Section>
+        </List>
+      </NativeScreen>
+    </>
+  );
+}

@@ -8,11 +8,13 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
 import type { HeaderBackButtonProps } from "@react-navigation/elements";
-import { HeaderBackButton } from "@react-navigation/elements";
 import { FiberProvider } from "its-fine";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { enableScreens } from "react-native-screens";
 
+import { DemoBackButton } from "../../../../components/demo-back-button";
+import { createDemoScreenLayout } from "../../../../components/demo-screen-layout";
+import { nestedDemoInitialState } from "../../../../components/nested-demo-deep-link";
 import { ViewSourceButton } from "../../../source-viewer/view-source-button";
 
 import {
@@ -42,10 +44,8 @@ import {
   Pictures,
   WebGPU,
 } from "./Examples";
-import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
-import { useAssets } from "./Tests/useAssets";
 import { Chess } from "./Examples/Chess";
 import "./resolveAssetSourcePolyfill";
 
@@ -72,7 +72,6 @@ const linking: LinkingOptions<StackParamList> = {
       Animation: "animation",
       Reanimated: "reanimated",
       Performance: "performance",
-      Tests: "test",
       Transitions: "transitions",
       Stickers: "stickers",
       FrostedCard: "frosted-card",
@@ -88,7 +87,6 @@ const linking: LinkingOptions<StackParamList> = {
 
 const sourcePathByRoute: Record<string, string> = {
   Home: 'features/skia/source/official/Home/HomeScreen.tsx',
-  Tests: 'features/skia/source/official/Tests/Tests.tsx',
   Vertices: 'features/skia/source/official/Examples/Vertices/Vertices.tsx',
   API: 'features/skia/source/official/Examples/API/index.tsx',
   LiquidGlass: 'features/skia/source/official/Examples/LiquidGlass/index.tsx',
@@ -118,18 +116,28 @@ const sourcePathByRoute: Record<string, string> = {
 };
 
 type AppProps = {
+  // Explorer addition: lets `/library/react-native-skia?demo=<route>` open one
+  // example directly. Upstream reaches these through its own `rnskia://` linking
+  // config, which cannot work here because Expo Router owns the URL scheme.
+  initialDemo?: string;
   onExit?: () => void;
 };
+
+const screenLayout = createDemoScreenLayout("react-native-skia");
+// Not `linking.config.screens`: that map still lists "Animation", a route with
+// no Stack.Screen behind it, and seeding the navigator with it would produce a
+// state pointing at nothing. `sourcePathByRoute` covers exactly the real screens.
+const routeNames = Object.keys(sourcePathByRoute);
 
 type HeaderLeftProps = HeaderBackButtonProps & {
   onExit?: () => void;
 };
 
-const HeaderLeft = ({ onExit, ...props }: HeaderLeftProps) => {
+const HeaderLeft = ({ onExit, tintColor }: HeaderLeftProps) => {
   const navigation = useNavigation();
   return (
-    <HeaderBackButton
-      {...props}
+    <DemoBackButton
+      tintColor={tintColor}
       onPress={() => {
         if (navigation.canGoBack()) {
           navigation.goBack();
@@ -145,20 +153,21 @@ const HeaderLeft = ({ onExit, ...props }: HeaderLeftProps) => {
 
 enableScreens(true);
 
-const App = ({ onExit }: AppProps) => {
+const App = ({ initialDemo, onExit }: AppProps) => {
   const Stack = createNativeStackNavigator<StackParamList>();
-  const assets = useAssets();
-  if (assets === null) {
-    return null;
-  }
   return (
     <FiberProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <StatusBar hidden />
         <NavigationIndependentTree>
-          <NavigationContainer linking={linking}>
+          <NavigationContainer
+            linking={linking}
+            initialState={nestedDemoInitialState("Home", initialDemo, routeNames)}
+          >
             <Stack.Navigator
+              screenLayout={screenLayout}
               screenOptions={({ route }) => ({
+                headerBackButtonDisplayMode: "minimal",
                 headerLeft: (props) => <HeaderLeft {...props} onExit={onExit} />,
                 headerRight: () => (
                   <ViewSourceButton
@@ -170,7 +179,7 @@ const App = ({ onExit }: AppProps) => {
                   />
                 ),
               })}
-              initialRouteName={CI ? "Tests" : "Home"}
+              initialRouteName="Home"
             >
             <Stack.Screen
               name="Home"
@@ -180,15 +189,6 @@ const App = ({ onExit }: AppProps) => {
                 title: "🎨 Skia",
               }}
             />
-            <Stack.Screen
-              key="Tests"
-              name="Tests"
-              options={{
-                title: "🔧 Tests",
-              }}
-            >
-              {(props) => <Tests {...props} assets={assets} />}
-            </Stack.Screen>
             <Stack.Screen name="Vertices" component={Vertices} />
             <Stack.Screen name="API" component={API} />
             <Stack.Screen name="LiquidGlass" component={LiquidGlass} />

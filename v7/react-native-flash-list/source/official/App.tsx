@@ -12,10 +12,10 @@ import React from "react";
 import { DebugContextProvider } from "./Debug";
 import NavigationTree from "./NavigationTree";
 
-const App = () => {
+const App = ({ initialDemo }: { initialDemo?: string }) => {
   return (
     <DebugContextProvider>
-      <NavigationTree />
+      <NavigationTree initialDemo={initialDemo} />
     </DebugContextProvider>
   );
 };

@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import {
   type EnrichedTextInputInstance,
   type OnChangeTextEvent,
@@ -25,7 +25,6 @@ import {
   DEFAULT_IMAGE_WIDTH,
   prepareImageDimensions,
 } from '../utils/prepareImageDimensions';
-import { launchImageLibrary } from 'react-native-image-picker';
 
 type CurrentLinkState = OnLinkDetected;
 
@@ -212,15 +211,15 @@ export function useEditorState() {
       return;
     }
 
-    const response = await launchImageLibrary({
-      mediaType: 'photo',
+    const response = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
       selectionLimit: 1,
     });
 
-    if (response?.assets?.[0] === undefined) return;
+    if (response.canceled || response.assets?.[0] === undefined) return;
 
     const asset = response.assets[0];
-    const imageUri = Platform.OS === 'android' ? asset.originalPath : asset.uri;
+    const imageUri = asset.uri;
 
     if (imageUri) {
       const { finalWidth, finalHeight } = prepareImageDimensions(

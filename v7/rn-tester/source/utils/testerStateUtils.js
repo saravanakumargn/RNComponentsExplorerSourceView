@@ -21,7 +21,6 @@ import RNTesterList from './RNTesterList';
 export const Screens = {
   COMPONENTS: 'components',
   APIS: 'apis',
-  PLAYGROUNDS: 'playgrounds',
 } as const;
 
 export const initialNavigationState: RNTesterNavigationState = {
@@ -32,6 +31,38 @@ export const initialNavigationState: RNTesterNavigationState = {
   recentlyUsed: {components: [], apis: []},
   hadDeepLink: false,
 };
+
+/**
+ * Host integration: opens one module directly for `?demo=<module key>`.
+ *
+ * The section matters as well as the key — the bottom nav bar reads `screen`,
+ * so seeding an API module while `screen` still says "components" would open the
+ * right example under the wrong tab. An unknown key falls back to the list.
+ */
+export function getInitialNavigationState(
+  activeModuleKey: ?string,
+): RNTesterNavigationState {
+  if (activeModuleKey == null) {
+    return initialNavigationState;
+  }
+
+  const api = RNTesterList.APIs.find(module => module.key === activeModuleKey);
+  const component = RNTesterList.Components.find(
+    module => module.key === activeModuleKey,
+  );
+  const match = api ?? component;
+
+  if (match == null) {
+    return initialNavigationState;
+  }
+
+  return {
+    ...initialNavigationState,
+    activeModuleKey,
+    activeModuleTitle: match.module.title,
+    screen: api != null ? Screens.APIS : Screens.COMPONENTS,
+  };
+}
 
 const filterEmptySections = (examplesList: ExamplesList): any => {
   const filteredSections: {

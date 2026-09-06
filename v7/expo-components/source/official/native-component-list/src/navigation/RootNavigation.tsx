@@ -38,11 +38,15 @@ export const linking: LinkingOptions<object> = {
   },
 };
 
-export default function RootNavigation() {
+// Host integration: `initialState` lets the explorer's `?demo=` deep link open
+// one screen directly. Upstream reaches these through its own linking prefix,
+// which cannot work here because Expo Router owns the URL scheme.
+export default function RootNavigation({ initialState }: { initialState?: object }) {
   const { name: themeName } = useTheme();
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer
+        initialState={initialState as never}
         linking={linking}
         fallback={<Text>Loading…</Text>}
         theme={themeName === 'dark' ? DarkTheme : DefaultTheme}>

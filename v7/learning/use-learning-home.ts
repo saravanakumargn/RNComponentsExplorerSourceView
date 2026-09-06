@@ -3,10 +3,13 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { createLearningContentRepository } from './data/learning-content-repository';
 import { getLearningProgressRepository } from './data/learning-progress-repository';
-import type { LastReadLesson } from './data/learning-types';
+import type { LastReadLesson, LearningAreaContentCounts } from './data/learning-types';
+import { getAvailableLearningAreas, type LearningArea } from './learning-areas';
 import { learningProgressPercent } from './learning-progress-summary';
 
 export type LearningHomeData = {
+  areaCounts: LearningAreaContentCounts;
+  areas: LearningArea[];
   completedLessons: number;
   progressPercent: number;
   resumeLesson: LastReadLesson | null;
@@ -24,8 +27,10 @@ export function useLearningHome(): { data: LearningHomeData | null; error: Error
     void (async () => {
       try {
         setError(null);
-        const [topics, progress] = await Promise.all([
-          createLearningContentRepository(database).getTopics(),
+        const content = createLearningContentRepository(database);
+        const [topics, areaCounts, progress] = await Promise.all([
+          content.getTopics(),
+          content.getAreaContentCounts(),
           getLearningProgressRepository(),
         ]);
         const [completedLessons, resumeLesson] = await Promise.all([
@@ -34,7 +39,7 @@ export function useLearningHome(): { data: LearningHomeData | null; error: Error
         ]);
         if (!active) return;
         const totalLessons = topics.reduce((total, topic) => total + topic.lessonCount, 0);
-        setData({ completedLessons, progressPercent: learningProgressPercent(completedLessons, totalLessons), resumeLesson, totalLessons });
+        setData({ areaCounts, areas: getAvailableLearningAreas(areaCounts), completedLessons, progressPercent: learningProgressPercent(completedLessons, totalLessons), resumeLesson, totalLessons });
       } catch (cause) {
         if (active) setError(cause instanceof Error ? cause : new Error('Learning data is unavailable.'));
       }

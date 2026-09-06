@@ -4,8 +4,9 @@ import {
   NavigationIndependentTree,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { HeaderBackButton } from '@react-navigation/elements';
 import { useEffect, type ComponentType } from 'react';
+
+import { DemoBackButton } from '@/components/demo-back-button';
 
 import { setReactNativeUiLibNavigationAdapter } from './react-native-navigation-bridge';
 
@@ -82,13 +83,18 @@ export function ReactNativeUiLibDemoHost({ onBackToCatalog }: ReactNativeUiLibDe
   return (
     <NavigationIndependentTree>
       <NavigationContainer ref={navigationRef}>
-        <Stack.Navigator initialRouteName="main">
+        <Stack.Navigator
+          initialRouteName="main"
+          screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}
+        >
           <Stack.Screen
             name="main"
             component={MainScreen}
             options={{
               title: 'R N U I L I B',
-              headerLeft: () => <HeaderBackButton onPress={onBackToCatalog} />,
+              headerLeft: ({ tintColor }) => (
+                <DemoBackButton tintColor={tintColor} onPress={onBackToCatalog} />
+              ),
             }}
           />
           <Stack.Screen

@@ -31,7 +31,7 @@ function useSplashScreen(loadingFunction: () => Promise<void>) {
   return isLoadingCompleted;
 }
 
-function AppContent() {
+function AppContent({ initialState }: { initialState?: object }) {
   const { name: themeName } = useTheme();
   const isLoadingCompleted = useSplashScreen(async () => {
     await loadAssetsAsync();
@@ -43,13 +43,13 @@ function AppContent() {
     }
   }, [themeName]);
 
-  return isLoadingCompleted ? <RootNavigation /> : null;
+  return isLoadingCompleted ? <RootNavigation initialState={initialState} /> : null;
 }
 
-export default function App() {
+export default function App({ initialState }: { initialState?: object }) {
   return (
     <ThemeProvider>
-      <AppContent />
+      <AppContent initialState={initialState} />
     </ThemeProvider>
   );
 }

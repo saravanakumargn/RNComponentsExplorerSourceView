@@ -1,8 +1,4 @@
 export type StackParamList = {
-  Tests: {
-    title?: string;
-    path?: string[];
-  };
   Home: undefined;
   Vertices: undefined;
   API: undefined;

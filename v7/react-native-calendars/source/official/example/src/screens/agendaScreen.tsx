@@ -49,6 +49,7 @@ export default class AgendaScreen extends Component<State> {
 
   loadItems = (day: DateData) => {
     const items = this.state.items || {};
+    let addedNewDay = false;
 
     setTimeout(() => {
       for (let i = -15; i < 85; i++) {
@@ -56,8 +57,9 @@ export default class AgendaScreen extends Component<State> {
         const strTime = this.timeToString(time);
 
         if (!items[strTime]) {
+          addedNewDay = true;
           items[strTime] = [];
-          
+
           const numItems = Math.floor(Math.random() * 3 + 1);
           for (let j = 0; j < numItems; j++) {
             items[strTime].push({
@@ -68,7 +70,15 @@ export default class AgendaScreen extends Component<State> {
           }
         }
       }
-      
+
+      // react-native-calendars re-requests the currently visible month on every layout pass,
+      // not just when the visible month actually changes. Skipping setState when nothing new
+      // was loaded avoids handing Agenda a fresh `items` reference on every re-render, which
+      // can otherwise cascade into a "Maximum update depth exceeded" loop.
+      if (!addedNewDay) {
+        return;
+      }
+
       const newItems: AgendaSchedule = {};
       Object.keys(items).forEach(key => {
         newItems[key] = items[key];

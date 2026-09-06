@@ -1,4 +1,4 @@
-import { Stack, useRouter } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import { HeaderBackButton } from "expo-router/react-navigation";
 import * as React from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
@@ -7,6 +7,26 @@ import { Image, type ImageSource } from "expo-image";
 import { useDarkMode } from "react-native-dark";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { appColors } from "../consts/colors";
+import { ViewSourceButton } from "../../../../source-viewer/view-source-button";
+
+function ChartSourceButton() {
+  const segments = useSegments();
+  // segments looks like ["victory-native-xl", "line-chart"] or
+  // ["victory-native-xl", "guides", "getting-started"]; the chart route is
+  // everything after the fixed "victory-native-xl" prefix, "index" at the root.
+  const routeSegments = segments.slice(1);
+  const route = routeSegments.length > 0 ? routeSegments.join("/") : "index";
+
+  return (
+    <ViewSourceButton
+      demoId="victory-native-xl"
+      iconOnly
+      title="Victory Native XL source"
+      initialPath={`features/victory-native-xl/source/official/app/${route}.tsx`}
+      onlyInitialPath
+    />
+  );
+}
 
 const titleCaseName = (name: string) =>
   name
@@ -78,6 +98,7 @@ export default function Layout() {
                 tintColor={tintColor}
               />
             ),
+            headerRight: () => <ChartSourceButton />,
           }}
         />
       </View>

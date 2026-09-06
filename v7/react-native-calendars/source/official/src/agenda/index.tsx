@@ -93,6 +93,7 @@ export default class Agenda extends Component<AgendaProps, State> {
   private scrollTimeout?: ReturnType<typeof setTimeout>;
   private headerState: string;
   private currentMonth: XDate;
+  private hasScrolledOnCalendarLayout: boolean;
   private knobTracker: VelocityTracker;
   private _isMounted: boolean | undefined;
   private scrollPad: React.RefObject<any> = React.createRef();
@@ -111,6 +112,7 @@ export default class Agenda extends Component<AgendaProps, State> {
 
     this.scrollTimeout = undefined;
     this.headerState = 'idle';
+    this.hasScrolledOnCalendarLayout = false;
 
     this.state = {
       scrollY: new Animated.Value(0),
@@ -262,6 +264,14 @@ export default class Agenda extends Component<AgendaProps, State> {
   };
 
   onCalendarListLayout = () => {
+    // Only the first layout needs a corrective scroll to the selected day. Re-running this on
+    // every subsequent layout (e.g. after markedDates changes re-layout the CalendarList once
+    // items load) can retrigger onVisibleMonthsChange -> loadItemsForMonth -> a new items object
+    // -> another layout, cascading into a "Maximum update depth exceeded" render loop.
+    if (this.hasScrolledOnCalendarLayout) {
+      return;
+    }
+    this.hasScrolledOnCalendarLayout = true;
     this.calendar?.current?.scrollToDay(this.state.selectedDay, this.calendarOffset(), false);
   };
 

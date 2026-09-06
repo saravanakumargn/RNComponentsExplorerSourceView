@@ -3,6 +3,7 @@ import {
   type StaticParamList,
 } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { createContext, useContext } from 'react'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { VisionCamera } from 'react-native-vision-camera'
 import { CameraScreen } from './screens/CameraScreen'
@@ -10,9 +11,26 @@ import { PermissionsScreen } from './screens/PermissionsScreen'
 import { PhotoScreen } from './screens/PhotoScreen'
 import { VideoScreen } from './screens/VideoScreen'
 
+import { DemoBackButton } from '../../../../components/demo-back-button'
 import { ViewSourceButton } from '../../../source-viewer/view-source-button'
 
+const CatalogBackContext = createContext<(() => void) | null>(null)
+
+function CatalogBackButton() {
+  const onBackToCatalog = useContext(CatalogBackContext)
+
+  return onBackToCatalog ? (
+    <DemoBackButton
+      accessibilityLabel="Back to libraries"
+      onPress={onBackToCatalog}
+    />
+  ) : null
+}
+
 const RootStack = createNativeStackNavigator({
+  screenOptions: {
+    headerBackButtonDisplayMode: 'minimal',
+  },
   initialRouteName:
     VisionCamera.cameraPermissionStatus === 'authorized'
       ? 'Camera'
@@ -21,6 +39,7 @@ const RootStack = createNativeStackNavigator({
     Permissions: {
       screen: PermissionsScreen,
       options: {
+        headerLeft: () => <CatalogBackButton />,
         headerRight: () => (
           <ViewSourceButton
             demoId="react-native-vision-camera"
@@ -36,6 +55,7 @@ const RootStack = createNativeStackNavigator({
       screen: CameraScreen,
       options: {
         orientation: 'portrait_up',
+        headerLeft: () => <CatalogBackButton />,
         headerRight: () => (
           <ViewSourceButton
             demoId="react-native-vision-camera"
@@ -98,11 +118,13 @@ declare global {
 
 const Navigation = createStaticNavigation(RootStack)
 
-function App() {
+function App({ onBackToCatalog }: { onBackToCatalog: () => void }) {
   return (
-    <GestureHandlerRootView>
-      <Navigation />
-    </GestureHandlerRootView>
+    <CatalogBackContext.Provider value={onBackToCatalog}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Navigation />
+      </GestureHandlerRootView>
+    </CatalogBackContext.Provider>
   )
 }
 

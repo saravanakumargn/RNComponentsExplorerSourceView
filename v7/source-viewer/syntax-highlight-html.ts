@@ -1,6 +1,6 @@
 import hljs from 'highlight.js/lib/common';
 
-import { LEARNING_HIGHLIGHT_CSS } from '@/features/learning/learning-html-highlighter';
+import { HIGHLIGHT_JS_CSS } from '../../styles/highlight-js-css';
 
 function escapeHtml(value: string): string {
   return value
@@ -22,7 +22,7 @@ export function buildSourceHighlightHtml(content: string, language: string): str
     <style>
       html, body { margin: 0; padding: 0; background: #f3f3f3; }
       .hljs { margin: 0; font-family: Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5; }
-      ${LEARNING_HIGHLIGHT_CSS}
+      ${HIGHLIGHT_JS_CSS}
     </style>
   </head>
   <body>

@@ -3,9 +3,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTheme } from 'ThemeProvider';
 import { isRunningInExpoGo } from 'expo';
 import * as React from 'react';
-import { TouchableOpacity, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { View } from 'react-native';
 import { goBackToCatalog } from 'catalog-navigation-bridge';
+
+import { DemoBackButton } from '../../../../../../../components/demo-back-button';
 import { ExpoCatalogSegmentedControl } from 'expo-catalog-segmented-control';
 
 import { TabBackground } from '../components/TabBackground';
@@ -24,9 +25,13 @@ import { MediaLibraryScreens } from '../screens/MediaLibrary@Next/MediaLibrarySc
 import { ModulesCoreScreens } from '../screens/ModulesCore/ModulesCoreScreen';
 import { WorkletsScreens } from '../screens/Worklets/WorkletsScreen';
 import { type ScreenConfig } from '../types/ScreenConfig';
+import { createDemoScreenLayout } from '../../../../../../../components/demo-screen-layout';
 import { optionalRequire } from './routeBuilder';
 
 const Stack = createNativeStackNavigator();
+
+// Host integration: a readiness testID per screen for the route smoke suite.
+const screenLayout = createDemoScreenLayout('expo-components');
 
 export const ScreensList: ScreenConfig[] = [
   {
@@ -130,7 +135,7 @@ export const ScreensList: ScreenConfig[] = [
       return optionalRequire(() => require('../screens/ExpoObserveScreen'));
     },
     name: 'ExpoObserve',
-    options: { headerShown: false, title: 'Expo Observe' },
+    options: { title: 'Expo Observe' },
     route: 'expo-observe',
     linking: {
       path: 'expo-observe',
@@ -548,7 +553,10 @@ function ExpoApisStackNavigator(props: { navigation: BottomTabNavigationProp<any
   const { theme } = useTheme();
 
   return (
-    <Stack.Navigator {...props} {...getStackNavWithConfig(props.navigation, theme)}>
+    <Stack.Navigator
+      {...props}
+      {...getStackNavWithConfig(props.navigation, theme)}
+      screenLayout={screenLayout}>
       <Stack.Screen
         name="ExpoApis"
         options={{
@@ -578,14 +586,12 @@ function ExpoApisRoot({ navigation }: { navigation: BottomTabNavigationProp<any>
 
 function CatalogBackButton({ color }: { color?: string }) {
   return (
-    <TouchableOpacity
+    <DemoBackButton
       accessibilityLabel="Back to component libraries"
-      accessibilityRole="button"
-      hitSlop={12}
       onPress={goBackToCatalog}
-      testID="CatalogBackButton">
-      <Ionicons color={color} name="arrow-back" size={24} />
-    </TouchableOpacity>
+      testID="CatalogBackButton"
+      tintColor={color}
+    />
   );
 }
 

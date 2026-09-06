@@ -2,9 +2,10 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTheme } from 'ThemeProvider';
 import * as React from 'react';
-import { TouchableOpacity, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { View } from 'react-native';
 import { goBackToCatalog } from 'catalog-navigation-bridge';
+
+import { DemoBackButton } from '../../../../../../../components/demo-back-button';
 import { ExpoCatalogSegmentedControl } from 'expo-catalog-segmented-control';
 
 import { TabBackground } from '../components/TabBackground';
@@ -23,9 +24,13 @@ import { UIUniversalScreens } from '../screens/UIUniversal/UIUniversalScreen';
 import { VideoScreens } from '../screens/Video/VideoScreen';
 import { type ScreenConfig } from '../types/ScreenConfig';
 import getStackNavWithConfig from './StackConfig';
+import { createDemoScreenLayout } from '../../../../../../../components/demo-screen-layout';
 import { optionalRequire } from './routeBuilder';
 
 const Stack = createNativeStackNavigator();
+
+// Host integration: a readiness testID per screen for the route smoke suite.
+const screenLayout = createDemoScreenLayout('expo-components');
 
 const ScreensList: ScreenConfig[] = [
   {
@@ -326,7 +331,10 @@ export const screenApiItems = componentScreensToListElements(ScreensList);
 function ExpoComponentsStackNavigator(props: { navigation: BottomTabNavigationProp<any> }) {
   const { theme } = useTheme();
   return (
-    <Stack.Navigator {...props} {...getStackNavWithConfig(props.navigation, theme)}>
+    <Stack.Navigator
+      {...props}
+      {...getStackNavWithConfig(props.navigation, theme)}
+      screenLayout={screenLayout}>
       <Stack.Screen
         name="ExpoComponents"
         options={{
@@ -356,14 +364,12 @@ function ExpoComponentsRoot({ navigation }: { navigation: BottomTabNavigationPro
 
 function CatalogBackButton({ color }: { color?: string }) {
   return (
-    <TouchableOpacity
+    <DemoBackButton
       accessibilityLabel="Back to component libraries"
-      accessibilityRole="button"
-      hitSlop={12}
       onPress={goBackToCatalog}
-      testID="CatalogBackButton">
-      <Ionicons color={color} name="arrow-back" size={24} />
-    </TouchableOpacity>
+      testID="CatalogBackButton"
+      tintColor={color}
+    />
   );
 }
 

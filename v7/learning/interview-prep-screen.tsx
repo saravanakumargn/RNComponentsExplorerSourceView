@@ -1,20 +1,160 @@
-import { Link, Stack, useLocalSearchParams } from 'expo-router';
+import { ContentUnavailableView, List, ProgressView, Section, Text, VStack } from '@expo/ui/swift-ui';
+import { font, foregroundStyle, listStyle } from '@expo/ui/swift-ui/modifiers';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { FlatList, Pressable, useWindowDimensions, View } from 'react-native';
-import { ActivityIndicator, Card, Text } from 'react-native-paper';
-import { WebView } from 'react-native-webview';
-import { CenteredEmptyState } from '@/components/screen-layout';
+
+import { NativeNavRow } from '@/components/native-ui/native-row.ios';
+import { NativeScreen } from '@/components/native-ui/native-screen';
+import { NATIVE_TINT } from '@/components/native-ui/native-tokens';
 import { createLearningContentRepository } from '@/features/learning/data/learning-content-repository';
-import { isListItemUnlocked } from '@/features/learning/learning-access-policy';
-import { trackPremiumEvent } from '@/features/learning/learning-analytics';
-import { getLearningNavigationAccessibility } from '@/features/learning/learning-navigation-accessibility';
-import { buildLessonReaderHtml, getLearningReaderFontSize } from '@/features/learning/learning-lesson-reader-utils';
 import type { InterviewLevelCount, InterviewQuestion } from '@/features/learning/data/learning-types';
+import { getFreeItemCount, isItemUnlocked } from '@/features/learning/learning-access-policy';
+import { getLearningNavigationAccessibility } from '@/features/learning/learning-navigation-accessibility';
+import { usePaywall } from '@/features/purchases/paywall-provider';
 import { useSubscription } from '@/features/purchases/use-subscription';
+
+/** The reader stays React Native on every platform — see its own file for why. */
+export { InterviewReaderScreen } from '@/features/learning/interview-reader-screen';
+
+const SECONDARY = { type: 'hierarchical', style: 'secondary' } as const;
+const LOCKED = '#8E8E93';
+
 const names = { 1: 'Beginner', 2: 'Intermediate', 3: 'Advanced' } as const;
-function Loading() { return <CenteredEmptyState><ActivityIndicator /></CenteredEmptyState>; }
-export function InterviewPrepScreen() { const db = useSQLiteContext(); const [items, setItems] = useState<InterviewLevelCount[] | null>(null); useEffect(() => { void createLearningContentRepository(db).getInterviewLevelCounts().then(setItems); }, [db]); if (!items) return <Loading />; return <FlatList testID="interview-prep-ready" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ gap: 12, padding: 16, paddingBottom: 32 }} ListHeaderComponent={<View style={{ gap: 6, paddingBottom: 8 }}><Text variant="labelLarge" style={{ letterSpacing: 0.8 }}>INTERVIEW PREP</Text><Text variant="headlineSmall">Practice with intent.</Text><Text selectable variant="bodyMedium">Choose a level and work through focused React Native questions at your own pace.</Text></View>} data={items} keyExtractor={(x) => String(x.level)} renderItem={({ item }) => <Link href={{ pathname: '/interview-prep/[level]', params: { level: item.level } }} asChild><Pressable testID={`interview-level-${item.level}`} accessibilityRole="button" accessibilityLabel={getLearningNavigationAccessibility({ title: `${names[item.level]}, ${item.count} questions`, destination: 'interview questions' })} accessibilityHint="Opens interview questions" style={{ minHeight: 44 }}><Card mode="outlined" style={{ borderCurve: 'continuous' }}><Card.Content style={{ alignItems: 'center', flexDirection: 'row', gap: 12, paddingVertical: 16 }}><View style={{ alignItems: 'center', backgroundColor: '#EEF4FF', borderRadius: 22, height: 44, justifyContent: 'center', width: 44 }}><MaterialIcons accessible={false} color="#005AC1" name="school" size={23} /></View><View style={{ flex: 1, gap: 2 }}><Text variant="titleLarge">{names[item.level]}</Text><Text selectable variant="bodyMedium">{item.count} questions</Text></View><MaterialIcons accessible={false} color="#56657A" name="chevron-right" size={26} /></Card.Content></Card></Pressable></Link>} />; }
-export function InterviewListScreen() { const { level } = useLocalSearchParams<{ level: string }>(); const parsed = Number(level) as 1 | 2 | 3; const db = useSQLiteContext(); const [items, setItems] = useState<InterviewQuestion[] | null>(null); const { isSubscribed } = useSubscription(); useEffect(() => { void createLearningContentRepository(db).getInterviewQuestions(parsed).then(setItems); }, [db, parsed]); if (!items) return <Loading />; return <><Stack.Screen options={{ title: names[parsed] ?? 'Interview Prep' }} /><FlatList testID="interview-list-ready" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ gap: 10, padding: 16, paddingBottom: 32 }} ListHeaderComponent={<View style={{ gap: 4, paddingBottom: 8 }}><Text variant="labelLarge" style={{ letterSpacing: 0.8 }}>{names[parsed]?.toUpperCase() ?? 'INTERVIEW PREP'}</Text><Text selectable variant="bodyMedium">The first ten questions are available to read. Locked questions retain the original upgrade journey.</Text></View>} data={items} keyExtractor={(x) => String(x.questionId)} renderItem={({ item, index }) => { const unlocked = isListItemUnlocked(index, isSubscribed); return <Link href={unlocked ? { pathname: '/interview-prep/read/[questionId]', params: { questionId: item.questionId } } : '/subscription'} asChild><Pressable testID={`interview-item-${index}`} accessibilityRole="button" accessibilityLabel={getLearningNavigationAccessibility({ title: item.question, destination: 'interview question', locked: !unlocked })} accessibilityHint={unlocked ? 'Opens interview question' : 'Opens subscription options'} onPress={unlocked ? undefined : () => trackPremiumEvent('premium_interview_questions_list')} style={{ minHeight: 44 }}><Card mode="outlined" style={{ borderCurve: 'continuous', opacity: unlocked ? 1 : 0.82 }}><Card.Content style={{ alignItems: 'center', flexDirection: 'row', gap: 12, paddingVertical: 13 }}><View style={{ alignItems: 'center', backgroundColor: unlocked ? '#EEF4FF' : '#F2F0F4', borderRadius: 18, height: 36, justifyContent: 'center', width: 36 }}><MaterialIcons accessible={false} color={unlocked ? '#005AC1' : '#56657A'} name={unlocked ? 'record-voice-over' : 'lock-outline'} size={19} /></View><View style={{ flex: 1, gap: 4 }}><Text numberOfLines={unlocked ? 3 : 1} variant="titleMedium">{item.question}</Text><Text variant="labelSmall">{unlocked ? 'Available offline' : 'Locked'}</Text></View><MaterialIcons accessible={false} color="#56657A" name={unlocked ? 'chevron-right' : 'lock-outline'} size={24} /></Card.Content></Card></Pressable></Link>; }} /></>; }
-export function InterviewReaderScreen() { const { questionId } = useLocalSearchParams<{ questionId: string }>(); const db = useSQLiteContext(); const [item, setItem] = useState<InterviewQuestion | null | undefined>(); const { fontScale } = useWindowDimensions(); useEffect(() => { void createLearningContentRepository(db).getInterviewQuestion(Number(questionId)).then(setItem).catch(() => setItem(null)); }, [db, questionId]); if (item === undefined) return <Loading />; if (!item) return <CenteredEmptyState><Text>This question is unavailable.</Text></CenteredEmptyState>; return <View testID="interview-reader-ready" style={{ flex: 1 }}><Stack.Screen options={{ title: 'Interview Prep' }} /><WebView originWhitelist={['*']} source={{ html: buildLessonReaderHtml(`<h2>${item.question}</h2>${item.explanation}`, getLearningReaderFontSize(fontScale)) }} /></View>; }
+
+/** A level's own hue, so the three are told apart before they are read. */
+const LEVEL_TINTS = { 1: '#34C759', 2: '#FF9500', 3: '#FF2D55' } as const;
+
+export function InterviewPrepScreen() {
+  const database = useSQLiteContext();
+  const router = useRouter();
+  const [items, setItems] = useState<InterviewLevelCount[] | null>(null);
+
+  useEffect(() => {
+    void createLearningContentRepository(database).getInterviewLevelCounts().then(setItems);
+  }, [database]);
+
+  if (!items) {
+    return (
+      <NativeScreen>
+        <VStack spacing={12}>
+          <ProgressView />
+          <Text modifiers={[foregroundStyle(SECONDARY)]}>Loading interview prep…</Text>
+        </VStack>
+      </NativeScreen>
+    );
+  }
+
+  return (
+    <NativeScreen testID="interview-prep-ready">
+      <List modifiers={[listStyle('insetGrouped')]}>
+        <Section
+          footer={
+            <Text modifiers={[font({ textStyle: 'footnote' }), foregroundStyle(SECONDARY)]}>
+              Choose a level and work through focused React Native questions at your own pace.
+            </Text>
+          }
+          title="Practice with intent"
+        >
+          {items.map((item) => (
+            <NativeNavRow
+              caption={`${item.count.toLocaleString('en-US')} questions`}
+              key={item.level}
+              label={getLearningNavigationAccessibility({ title: `${names[item.level]}, ${item.count} questions`, destination: 'interview questions' })}
+              onPress={() => router.push({ pathname: '/interview-prep/[level]', params: { level: item.level } })}
+              symbol="graduationcap.fill"
+              testID={`interview-level-${item.level}`}
+              tint={LEVEL_TINTS[item.level] ?? NATIVE_TINT}
+              title={names[item.level]}
+            />
+          ))}
+        </Section>
+      </List>
+    </NativeScreen>
+  );
+}
+
+/**
+ * The questions at one level, with the free ones open and the rest behind the
+ * one-time unlock. Locked rows open the shared paywall rather than navigating,
+ * matching what the Paper `LearningRowLink` did.
+ */
+export function InterviewListScreen() {
+  const { level } = useLocalSearchParams<{ level: string }>();
+  const parsed = Number(level) as 1 | 2 | 3;
+  const database = useSQLiteContext();
+  const router = useRouter();
+  const { openPaywall } = usePaywall();
+  const { learningUnlocked } = useSubscription();
+  const [items, setItems] = useState<InterviewQuestion[] | null>(null);
+
+  useEffect(() => {
+    void createLearningContentRepository(database).getInterviewQuestions(parsed).then(setItems);
+  }, [database, parsed]);
+
+  if (!items) {
+    return (
+      <NativeScreen>
+        <VStack spacing={12}>
+          <ProgressView />
+          <Text modifiers={[foregroundStyle(SECONDARY)]}>Loading questions…</Text>
+        </VStack>
+      </NativeScreen>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <>
+        <Stack.Screen options={{ title: names[parsed] ?? 'Interview Prep' }} />
+        <NativeScreen>
+          <ContentUnavailableView
+            description="This level has no published questions yet."
+            systemImage="graduationcap"
+            title="Nothing here yet"
+          />
+        </NativeScreen>
+      </>
+    );
+  }
+
+  const freeCount = getFreeItemCount(items.length);
+
+  return (
+    <>
+      <Stack.Screen options={{ title: names[parsed] ?? 'Interview Prep' }} />
+      <NativeScreen testID="interview-list-ready">
+        <List modifiers={[listStyle('insetGrouped')]}>
+          <Section
+            footer={
+              freeCount > 0 ? (
+                <Text modifiers={[font({ textStyle: 'footnote' }), foregroundStyle(SECONDARY)]}>
+                  {freeCount === 1 ? 'The first question is open to read.' : `The first ${freeCount} questions are open to read.`} The one-time library unlock opens the rest.
+                </Text>
+              ) : undefined
+            }
+          >
+            {items.map((question, index) => {
+              const unlocked = isItemUnlocked(index, items.length, learningUnlocked);
+              const href = { pathname: '/interview-prep/read/[questionId]', params: { questionId: question.questionId } } as const;
+
+              return (
+                <NativeNavRow
+                  caption={unlocked ? 'Available offline' : 'Locked'}
+                  key={question.questionId}
+                  label={getLearningNavigationAccessibility({ title: question.question, destination: 'interview question', locked: !unlocked })}
+                  onPress={() => (unlocked ? router.push(href) : openPaywall('premium_interview_questions_list'))}
+                  symbol={unlocked ? 'quote.bubble.fill' : 'lock.fill'}
+                  testID={`interview-item-${index}`}
+                  tint={unlocked ? NATIVE_TINT : LOCKED}
+                  title={question.question}
+                  trailingSymbol={unlocked ? undefined : 'lock.fill'}
+                />
+              );
+            })}
+          </Section>
+        </List>
+      </NativeScreen>
+    </>
+  );
+}

@@ -1,5 +1,8 @@
 import React from 'react';
 import { NavigationContainer, useTheme as  useNavigationTheme } from '@react-navigation/native';
+
+import { createDemoScreenLayout } from '../../../../../../../components/demo-screen-layout';
+import { nestedDemoInitialRouteName } from '../../../../../../../components/nested-demo-deep-link';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Tab, useTheme } from '@rneui/themed';
 import DrawerNavigator from './DrawerNavigator';
@@ -38,7 +41,45 @@ import { useNavigation } from 'expo-router';
 
 const Drawer = createDrawerNavigator();
 
-function RootNavigator() {
+// Host integration: a readiness testID per screen, plus `?demo=<route>` support
+// for the route smoke suite. A drawer has no back stack, so the deep link names
+// the initial route rather than seeding history behind it.
+const screenLayout = createDemoScreenLayout("react-native-elements");
+const ROUTE_NAMES = [
+  "Avatars",
+  "Badge",
+  "BottomSheet",
+  "Buttons",
+  "Cards",
+  "Checkbox",
+  "Chips",
+  "Dialogs",
+  "Divider",
+  "FAB",
+  "Fonts",
+  "Image",
+  "Inputs",
+  "LinearProgress",
+  "Lists",
+  "Lists2",
+  "Login",
+  "Overlay",
+  "Pricing",
+  "Ratings",
+  "Settings",
+  "Slider",
+  "Skeleton",
+  "Social Icons",
+  "Speed Dial",
+  "Tabs",
+  "Text",
+  "Theme",
+  "Tiles",
+  "Tooltip",
+  "Whatsapp Clone",
+];
+
+function RootNavigator({ initialDemo }: { initialDemo?: string }) {
   const { theme } = useTheme();
 ``
   return (
@@ -46,6 +87,8 @@ function RootNavigator() {
     >
       <Drawer.Navigator
         id={undefined}
+        initialRouteName={nestedDemoInitialRouteName('Avatars', initialDemo, ROUTE_NAMES)}
+        screenLayout={screenLayout}
         drawerContent={DrawerNavigator}
         screenOptions={{
           headerShown: false,

@@ -1,8 +1,10 @@
 import { useMemo, useState, type ComponentType } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { IconButton, Text, useTheme } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { DemoBackButton } from '@/components/demo-back-button';
+import { useBottomContentPadding } from '@/components/screen-layout';
 import { ViewSourceButton } from '@/features/source-viewer/view-source-button';
 
 import { REACT_HOOK_FORM_EXAMPLES, type ReactHookFormExampleSlug } from './catalog';
@@ -32,6 +34,7 @@ const exampleSourcePaths: Record<ReactHookFormExampleSlug, string> = {
 };
 
 type ReactHookFormDemoHostProps = {
+  initialDemo?: string;
   onBackToCatalog: () => void;
 };
 
@@ -53,13 +56,14 @@ function DemoHeader({
         { backgroundColor: theme.colors.background, borderBottomColor: theme.colors.outlineVariant },
       ]}
     >
-      <IconButton icon="chevron-left" accessibilityLabel="Back" onPress={onBack} />
+      <DemoBackButton onPress={onBack} />
       <Text variant="titleMedium" style={styles.headerTitle} numberOfLines={1}>
         {title}
       </Text>
       <ViewSourceButton
         demoId="react-hook-form"
-        title="Source"
+        iconOnly
+        title="React Hook Form source"
         initialPath={sourcePath}
         onlyInitialPath={sourcePath !== undefined}
       />
@@ -67,9 +71,13 @@ function DemoHeader({
   );
 }
 
-export function ReactHookFormDemoHost({ onBackToCatalog }: ReactHookFormDemoHostProps) {
+export function ReactHookFormDemoHost({ initialDemo, onBackToCatalog }: ReactHookFormDemoHostProps) {
   const theme = useTheme();
-  const [selectedSlug, setSelectedSlug] = useState<ReactHookFormExampleSlug | null>(null);
+  const bottomPadding = useBottomContentPadding(16);
+  // `?demo=` names an example slug; an unknown one opens the list, as elsewhere.
+  const [selectedSlug, setSelectedSlug] = useState<ReactHookFormExampleSlug | null>(
+    () => REACT_HOOK_FORM_EXAMPLES.find((example) => example.slug === initialDemo)?.slug ?? null,
+  );
   const examples = useMemo(() => REACT_HOOK_FORM_EXAMPLES, []);
 
   if (selectedSlug) {
@@ -77,7 +85,9 @@ export function ReactHookFormDemoHost({ onBackToCatalog }: ReactHookFormDemoHost
     const ExampleComponent = exampleComponents[selectedSlug];
 
     return (
-      <View style={{ flex: 1 }}>
+      // The list is unmounted while a demo is open, so this wrapper is what tells
+      // the smoke suite which demo actually mounted.
+      <View style={{ flex: 1 }} testID={`maestro-demo-react-hook-form-${selectedSlug}-ready`}>
         <SafeAreaView edges={['top']} style={{ backgroundColor: theme.colors.background }}>
           <DemoHeader
             title={meta?.title ?? selectedSlug}
@@ -95,7 +105,10 @@ export function ReactHookFormDemoHost({ onBackToCatalog }: ReactHookFormDemoHost
       <SafeAreaView edges={['top']} style={{ backgroundColor: theme.colors.background }}>
         <DemoHeader title="React Hook Form" onBack={onBackToCatalog} />
       </SafeAreaView>
-      <ScrollView style={{ backgroundColor: theme.colors.background }} contentContainerStyle={styles.list}>
+      <ScrollView
+        style={{ backgroundColor: theme.colors.background }}
+        contentContainerStyle={[styles.list, { paddingBottom: bottomPadding }]}
+      >
         {examples.map((example) => (
           <Pressable
             key={example.slug}
@@ -120,6 +133,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: 'row',
     gap: 4,
+    minHeight: 48,
     paddingRight: 12,
   },
   headerTitle: {

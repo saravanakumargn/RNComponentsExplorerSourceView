@@ -1,4 +1,3 @@
-import { LEARNING_HIGHLIGHT_CSS, enhanceLearningHtmlCodeBlocks } from './learning-html-highlighter';
 
 export const LESSON_END_THRESHOLD = 24;
 
@@ -44,8 +43,4 @@ export function getLessonProgressUnavailableFeedback(): string {
 export function getLearningReaderFontSize(fontScale: number): number {
   if (!Number.isFinite(fontScale) || fontScale <= 0) return 18;
   return Math.min(36, Math.max(16, Math.round(18 * fontScale)));
-}
-
-export function buildLessonReaderHtml(contentBody: string, fontSize = 18): string {
-  return `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>html{background:#fff}body{margin:0;padding:24px max(20px, env(safe-area-inset-right)) 32px max(20px, env(safe-area-inset-left));font:${fontSize}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6;color:#1c1b1f;background:#fff}h1,h2,h3{line-height:1.25}pre{white-space:pre-wrap;overflow-wrap:anywhere}code{overflow-wrap:anywhere}img{display:block;max-width:100%;height:auto}table{display:block;max-width:100%;overflow-x:auto}${LEARNING_HIGHLIGHT_CSS}</style></head><body>${enhanceLearningHtmlCodeBlocks(contentBody)}</body></html>`;
 }

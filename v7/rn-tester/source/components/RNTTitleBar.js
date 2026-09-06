@@ -10,10 +10,10 @@
 
 import RNTesterDocumentationURL from './RNTesterDocumentationURL';
 import {type RNTesterTheme} from './RNTesterTheme';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import {HeaderBackButton} from 'expo-router/react-navigation';
+import {DemoBackButton} from '../../../../components/demo-back-button';
 import * as React from 'react';
-import {Platform, Pressable, StyleSheet, Text, View} from 'react-native';
+import {Platform, StyleSheet, Text, View} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const RNTesterBackButton = ({
   children,
@@ -35,26 +35,7 @@ const RNTesterBackButton = ({
     return null;
   }
 
-  if (Platform.OS === 'ios') {
-    return (
-      <HeaderBackButton
-        accessibilityLabel="Back"
-        onPress={onPress}
-        tintColor={theme.LinkColor}
-      />
-    );
-  }
-
-  return (
-    <Pressable
-      accessibilityLabel="Back"
-      accessibilityRole="button"
-      hitSlop={12}
-      onPress={onPress}
-      style={styles.androidBackButton}>
-      <Ionicons name="arrow-back" size={32} color={theme.LabelColor} />
-    </Pressable>
-  );
+  return <DemoBackButton onPress={onPress} tintColor={theme.LinkColor} />;
 };
 
 const HeaderIOS = ({
@@ -74,21 +55,32 @@ const HeaderIOS = ({
   onExit?: () => void,
   theme: RNTesterTheme,
 }) => {
+  const insets = useSafeAreaInsets();
   return (
     <View
-      style={[styles.header, {backgroundColor: theme.SystemBackgroundColor}]}>
+      style={[
+        styles.header,
+        {
+          marginTop: Platform.isTV ? 0 : insets.top,
+          backgroundColor: theme.SystemBackgroundColor,
+        },
+      ]}>
       <View style={styles.headerCenter}>
-        <Text style={{...styles.title, color: theme.LabelColor}}>{title}</Text>
-        {documentationURL && (
-          <RNTesterDocumentationURL documentationURL={documentationURL} />
-        )}
+        <Text numberOfLines={1} style={{...styles.title, color: theme.LabelColor}}>
+          {title}
+        </Text>
       </View>
       <View style={styles.backButton}>
         <RNTesterBackButton onBack={onBack} onExit={onExit} theme={theme}>
           {children}
         </RNTesterBackButton>
       </View>
-      <View style={styles.rightActions}>{rightChildren}</View>
+      <View style={styles.rightActions}>
+        {documentationURL && (
+          <RNTesterDocumentationURL documentationURL={documentationURL} />
+        )}
+        {rightChildren}
+      </View>
     </View>
   );
 };
@@ -110,20 +102,29 @@ const HeaderAndroid = ({
   onExit?: () => void,
   theme: RNTesterTheme,
 }) => {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.toolbar, {backgroundColor: theme.BackgroundColor}]}>
+    <View
+      style={[
+        styles.toolbar,
+        {marginTop: insets.top, backgroundColor: theme.BackgroundColor},
+      ]}>
       <View style={styles.toolbarCenter}>
-        <Text style={[styles.title, {color: theme.LabelColor}]}>{title}</Text>
-        {documentationURL && (
-          <RNTesterDocumentationURL documentationURL={documentationURL} />
-        )}
+        <Text numberOfLines={1} style={[styles.title, {color: theme.LabelColor}]}>
+          {title}
+        </Text>
       </View>
       <View style={styles.backButton}>
         <RNTesterBackButton onBack={onBack} onExit={onExit} theme={theme}>
           {children}
         </RNTesterBackButton>
       </View>
-      <View style={styles.rightActions}>{rightChildren}</View>
+      <View style={styles.rightActions}>
+        {documentationURL && (
+          <RNTesterDocumentationURL documentationURL={documentationURL} />
+        )}
+        {rightChildren}
+      </View>
     </View>
   );
 };
@@ -176,14 +177,13 @@ const styles = StyleSheet.create({
   header: {
     height: 40,
     flexDirection: 'row',
-    marginTop: Platform.OS === 'ios' && !Platform.isTV ? 50 : 0,
   },
   headerCenter: {
     flex: 1,
     position: 'absolute',
     top: 7,
-    left: 0,
-    right: 0,
+    left: 48,
+    right: 96,
     alignItems: 'center',
   },
   title: {
@@ -195,11 +195,13 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   rightActions: {
+    alignItems: 'center',
     alignSelf: 'flex-start',
+    flexDirection: 'row',
+    flexShrink: 0,
+    gap: 4,
     marginLeft: 'auto',
-  },
-  androidBackButton: {
-    padding: 4,
+    paddingRight: 4,
   },
   toolbar: {
     height: 56,
@@ -209,8 +211,8 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'absolute',
     top: 12,
-    left: 0,
-    right: 0,
+    left: 48,
+    right: 96,
     alignItems: 'center',
   },
 });

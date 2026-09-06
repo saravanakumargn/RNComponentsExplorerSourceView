@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
@@ -504,14 +503,6 @@ const HomeScreen = withSharedTransitionBoundary(HomeScreenContent);
 const DetailsScreen = withSharedTransitionBoundary(DetailsScreenContent);
 
 export default function ProfilesExample() {
-  // hide header of parent stack
-  const navigation = useNavigation();
-  React.useLayoutEffect(() => {
-    if (Platform.OS !== 'web') {
-      navigation.setOptions({ headerShown: false });
-    }
-  }, [navigation]);
-
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -521,7 +512,6 @@ export default function ProfilesExample() {
         component={ProfilesScreen}
         options={{
           animation: shouldReduceMotion ? 'fade' : 'default',
-          statusBarStyle: 'light',
         }}
       />
       <Stack.Screen
@@ -529,7 +519,6 @@ export default function ProfilesExample() {
         component={HomeScreen}
         options={{
           animation: shouldReduceMotion ? 'fade' : 'default',
-          statusBarStyle: 'dark',
         }}
       />
       <Stack.Screen
@@ -539,7 +528,6 @@ export default function ProfilesExample() {
           animation: 'fade',
           presentation: 'transparentModal',
           headerShown: false,
-          statusBarStyle: 'dark',
         }}
       />
     </Stack.Navigator>

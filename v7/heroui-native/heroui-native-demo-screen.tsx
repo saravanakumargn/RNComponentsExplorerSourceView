@@ -2,7 +2,6 @@ import {
   NavigationContainer,
   NavigationIndependentTree,
 } from '@react-navigation/native';
-import { HeaderBackButton } from '@react-navigation/elements';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HeroUINativeProvider } from 'heroui-native';
 import { useCallback, useEffect, type ComponentType } from 'react';
@@ -13,6 +12,8 @@ import {
 } from 'react-native-keyboard-controller';
 import { Uniwind } from 'uniwind';
 
+import { DemoBackButton } from '@/components/demo-back-button';
+import { nestedDemoInitialState } from '@/components/nested-demo-deep-link';
 import { ViewSourceButton } from '@/features/source-viewer/view-source-button';
 
 import { HeroUINativeRouterProvider } from './expo-router-adapter';
@@ -338,7 +339,13 @@ function sourcePathFor(name: string) {
   return `features/heroui-native/source/official/src/app/(home)/${name}.tsx`;
 }
 
-function HeroUINativeNavigator({ onBackToCatalog }: { onBackToCatalog: () => void }) {
+function HeroUINativeNavigator({
+  initialDemo,
+  onBackToCatalog,
+}: {
+  initialDemo?: string;
+  onBackToCatalog: () => void;
+}) {
   const screens: Required<ScreenDefinition>[] = [
     { name: 'home', component: HomeScreen, sourcePath: 'features/heroui-native/source/official/src/app/(home)/index.tsx' },
     { name: 'components', component: ComponentsScreen, sourcePath: 'features/heroui-native/source/official/src/app/(home)/components/index.tsx' },
@@ -348,10 +355,15 @@ function HeroUINativeNavigator({ onBackToCatalog }: { onBackToCatalog: () => voi
     ...modalScreens,
     ...showcaseScreens,
   ].map((screen) => ({ ...screen, sourcePath: screen.sourcePath ?? sourcePathFor(screen.name) }));
+  const initialState = nestedDemoInitialState(
+    'home',
+    initialDemo,
+    screens.map((screen) => screen.name),
+  );
 
   return (
     <NavigationIndependentTree>
-      <NavigationContainer>
+      <NavigationContainer initialState={initialState}>
         <Stack.Navigator
           initialRouteName="home"
           screenOptions={({ route }) => ({
@@ -361,6 +373,7 @@ function HeroUINativeNavigator({ onBackToCatalog }: { onBackToCatalog: () => voi
             // React Navigation host so content is not offset twice.
             headerTransparent: true,
             headerBlurEffect: 'light',
+            headerBackButtonDisplayMode: 'minimal',
             headerRight: () => {
               const sourcePath = screens.find((screen) => screen.name === route.name)?.sourcePath;
               return (
@@ -375,15 +388,20 @@ function HeroUINativeNavigator({ onBackToCatalog }: { onBackToCatalog: () => voi
             },
             headerLeft:
               route.name === 'home'
-                ? (props) => (
-                    <HeaderBackButton
-                      {...props}
-                      label="Libraries"
+                ? ({ tintColor }) => (
+                    <DemoBackButton
+                      tintColor={tintColor}
                       onPress={onBackToCatalog}
                       testID="HeroUINativeExitButton"
                     />
                   )
-                : undefined,
+                // Showcase screens render their own full-bleed back/close button assuming no
+                // native header chrome. Keep the header shown (so the source button above still
+                // renders) but suppress the native back control there to avoid a second,
+                // overlapping back affordance stacked on top of the showcase's own.
+                : route.name.startsWith('showcases/')
+                  ? () => null
+                  : undefined,
             headerShown: true,
             presentation: route.name.endsWith('-native-modal')
               ? 'modal'
@@ -402,10 +420,12 @@ function HeroUINativeNavigator({ onBackToCatalog }: { onBackToCatalog: () => voi
 }
 
 type HeroUINativeDemoScreenProps = {
+  initialDemo?: string;
   onBackToCatalog: () => void;
 };
 
 export function HeroUINativeDemoScreen({
+  initialDemo,
   onBackToCatalog,
 }: HeroUINativeDemoScreenProps) {
   useEffect(() => {
@@ -437,7 +457,7 @@ export function HeroUINativeDemoScreen({
               toast: { contentWrapper },
               devInfo: { stylingPrinciples: false },
             }}>
-            <HeroUINativeNavigator onBackToCatalog={onBackToCatalog} />
+            <HeroUINativeNavigator initialDemo={initialDemo} onBackToCatalog={onBackToCatalog} />
           </HeroUINativeProvider>
         </AppThemeProvider>
       </KeyboardProvider>
