@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useContext, useRef } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -23,7 +23,7 @@ import Rive, {
   useRiveTrigger,
 } from 'rive-react-native';
 import { Button } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { NavigationContext } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 
 export default function DataBinding() {
@@ -46,7 +46,13 @@ export default function DataBinding() {
   }, [coinValue]);
 
   // MODAL CONTROLS
-  const navigation = useNavigation();
+  // Upstream runs this screen inside an Expo Router stack, so `useNavigation()`
+  // always finds a navigator. The Explorer hosts Rive's examples directly under
+  // its own Paper header with no navigator of its own, and the throwing hook
+  // took the screen down with "Couldn't find a navigation object" the moment it
+  // opened. Reading the context instead yields undefined there, and the Controls
+  // button falls back to an in-screen one below so the demo stays usable.
+  const navigation = useContext(NavigationContext);
   const [isOpen, setIsOpen] = useState(false);
   const [livesInput, setLivesInput] = useState('');
   const [priceInput, setPriceInput] = useState('');
@@ -79,7 +85,7 @@ export default function DataBinding() {
   }, [buttonText, lives, barColor, price]);
 
   useEffect(() => {
-    navigation.setOptions({
+    navigation?.setOptions({
       // eslint-disable-next-line react/no-unstable-nested-components
       headerRight: () => (
         <Button
@@ -166,6 +172,11 @@ export default function DataBinding() {
 
   return (
     <SafeAreaView style={styles.safeAreaViewContainer}>
+      {!navigation ? (
+        <Button mode="text" onPress={() => setIsOpen(!isOpen)}>
+          Controls
+        </Button>
+      ) : null}
       <ScrollView contentContainerStyle={styles.container}>
         <Rive
           ref={setRiveRef}

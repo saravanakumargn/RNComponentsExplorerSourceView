@@ -119,8 +119,14 @@ export default function MenuScreen() {
 
         <Section title="Menu with fixed item order">
           {/* Menus opening upward reverse their items with the default automatic
-              order. menuOrder('fixed') keeps First/Second/Third top to bottom. */}
-          <Menu label="Fixed Order" modifiers={[menuOrder('fixed')]}>
+              order. menuOrder('fixed') keeps First/Second/Third top to bottom.
+
+              `menuOrder` does not exist in the @expo/ui pinned to this Expo SDK
+              (57.0.7) — upstream's demo is ahead of it. Calling it during render
+              threw `undefined is not a function` and crashed the screen on open,
+              so the modifier is applied only when the installed version has it.
+              This starts working on its own once @expo/ui ships `menuOrder`. */}
+          <Menu label="Fixed Order" modifiers={menuOrder ? [menuOrder('fixed')] : []}>
             <Button onPress={() => console.log('First')} label="First" />
             <Button onPress={() => console.log('Second')} label="Second" />
             <Button onPress={() => console.log('Third')} label="Third" />

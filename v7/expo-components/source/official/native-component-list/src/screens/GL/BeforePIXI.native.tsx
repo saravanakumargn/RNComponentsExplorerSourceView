@@ -12,6 +12,18 @@ class DOMNode {
   appendChild(element: any) {
     // unimplemented
   }
+
+  // React Navigation's stack renderer runs a web-only branch whenever a
+  // `document` global exists, and calls both of these on it. Without them it
+  // throws and takes down whatever screen is being pushed — see the note on
+  // `document.head` below.
+  contains(element: any) {
+    return false;
+  }
+
+  remove() {
+    // unimplemented
+  }
 }
 
 class DOMElement extends DOMNode {
@@ -117,6 +129,17 @@ window.document = new DOMDocument();
 
 // @ts-ignore
 window.document.body = new DOMElement('body');
+
+// This shim is installed at module scope, so opening this screen once leaves a
+// partial `document` on the global for the rest of the session. That is enough
+// for @react-navigation/stack's CardContent to take its web path — it only
+// guards on `typeof document === 'undefined' || !document.body` — and then
+// reach for `document.head.contains(...)`, which threw
+// `Cannot read property 'contains' of undefined` and crashed every screen
+// pushed after this one (every FlashList demo, among others). Giving the shim a
+// head keeps that path harmless.
+// @ts-ignore
+window.document.head = new DOMElement('head');
 
 // This could be made better, but I'm not sure if it'll matter for PIXI
 // @ts-ignore
